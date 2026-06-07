@@ -13,34 +13,140 @@ button{width:100%;padding:14px;background:#4caf50;color:white;border:none;border
 .hata{color:red;background:#ffe6e6;padding:10px;border-radius:8px;margin-top:10px;text-align:center;display:none}
 .ders-kart{border:2px solid #667eea;padding:15px;margin:10px 0;border-radius:10px;background:#f8f9ff}
 .ort{font-size:20px;font-weight:bold;color:#4caf50;text-align:center;margin-top:10px}
-.btn-sil{padding:5px 10px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;float:right}
-.bolum{border-top:2px solid #eee;padding-top:15px;margin-top:15px}
 </style>
 </head>
 <body>
 <div class="kutu">
 <h2>📝 Veli Not Paneli</h2>
 <div id="giris">
-<input type="text" id="ad" placeholder="Öğrenci Ad Soyad">
-<input type="password" id="sifre" placeholder="Şifre">
-<button onclick="girisYap()" style="background:#667eea">Giriş Yap</button>
+<form onsubmit="girisYap();return false;">
+<input type="text" id="ad" placeholder="Öğrenci Ad Soyad" required>
+<input type="password" id="sifre" placeholder="Şifre" required>
+<button type="submit" style="background:#667eea">Giriş Yap</button>
+</form>
 <div id="hata" class="hata">Bilgiler hatalı!</div>
 </div>
 <div id="panel" style="display:none">
 <h3 id="ogrAd"></h3>
 <p id="ogrSinif"></p>
-<div class="bolum">
-<h4>1. Ders Ekle</h4>
+<div style="border-top:2px solid #eee;padding-top:15px;margin-top:15px">
+<h4>Ders Ekle</h4>
 <select id="yeniDers"><option>Ders seçin...</option></select>
 <button onclick="dersEkle()">Ders Ekle</button>
 </div>
-<div class="bolum">
-<h4>2. Not Gir - 4 Yazılı</h4>
+<div style="border-top:2px solid #eee;padding-top:15px;margin-top:15px">
+<h4>Not Gir - 4 Yazılı</h4>
 <div id="dersler"></div>
 </div>
 <button onclick="cikisYap()" style="background:#999;margin-top:15px">Çıkış Yap</button>
 </div>
 </div>
+
 <script>
-let aktifOgr=null;let aktifIndex=null;const STORAGE_KEY='ogrenciler_v6';
-function ogrencileriGetir(){return JSON.parse(localStorage.get
+// FONKSİYONLAR EN ÜSTTE - TARAYICI GÖRSÜN DİYE
+const STORAGE_KEY='ogrenciler_v6';
+const DERS_KEY='sinif_dersleri_v2';
+let aktifOgr=null;
+let aktifIndex=null;
+
+function ogrencileriGetir(){
+return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+}
+
+function ogrencileriKaydet(l){
+localStorage.setItem(STORAGE_KEY,JSON.stringify(l));
+}
+
+function dersleriGetir(){
+return JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
+}
+
+function girisYap(){
+alert('Buton çalıştı!'); // TEST İÇİN - sonra sileceğiz
+let ad=document.getElementById('ad').value.trim().toLowerCase();
+let sifre=document.getElementById('sifre').value.trim();
+document.getElementById('hata').style.display='none';
+
+let ogrenciler=ogrencileriGetir();
+aktifIndex=ogrenciler.findIndex(o=>o.ad.toLowerCase()===ad && o.sifre===sifre);
+
+if(aktifIndex===-1){
+document.getElementById('hata').style.display='block';
+return;
+}
+
+aktifOgr=ogrenciler[aktifIndex];
+if(!aktifOgr.notlar)aktifOgr.notlar={};
+
+document.getElementById('giris').style.display='none';
+document.getElementById('panel').style.display='block';
+document.getElementById('ogrAd').innerText=aktifOgr.ad;
+document.getElementById('ogrSinif').innerText=aktifOgr.sinif;
+
+// Sınıf derslerini yükle
+let dersler=dersleriGetir();
+let sinifDersleri=dersler[aktifOgr.sinif]||[];
+let select=document.getElementById('yeniDers');
+select.innerHTML='<option>Ders seçin...</option>';
+sinifDersleri.forEach(d=>{
+if(!aktifOgr.notlar[d])select.innerHTML+=`<option>${d}</option>`;
+});
+dersleriListele();
+}
+
+function dersEkle(){
+let dersAdi=document.getElementById('yeniDers').value;
+if(dersAdi==='Ders seçin...'||!dersAdi){alert('Ders seçin');return;}
+let ogrenciler=ogrencileriGetir();
+if(ogrenciler[aktifIndex].notlar[dersAdi]){alert('Bu ders zaten eklendi');return;}
+ogrenciler[aktifIndex].notlar[dersAdi]={y1:'',y2:'',y3:'',y4:''};
+ogrencileriKaydet(ogrenciler);
+aktifOgr=ogrenciler[aktifIndex];
+dersleriListele();
+document.getElementById('yeniDers').value='Ders seçin...';
+}
+
+function notKaydet(ders,yazili){
+let deger=document.getElementById(ders+'_'+yazili).value;
+if(deger!==''&&(deger<0||deger>100)){alert('0-100 arası girin');return;}
+let ogrenciler=ogrencileriGetir();
+ogrenciler[aktifIndex].notlar[yazili]=deger;
+ogrencileriKaydet(ogrenciler);
+aktifOgr=ogrenciler[aktifIndex];
+dersleriListele();
+}
+
+function ortalamaHesapla(notlar){
+let notlarArr=[notlar.y1,notlar.y2,notlar.y3,notlar.y4].filter(n=>n!==''&&!isNaN(n)).map(Number);
+if(notlarArr.length===0)return'-';
+return (notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1);
+}
+
+function dersleriListele(){
+let html='';
+if(Object.keys(aktifOgr.notlar).length===0){
+html='Henüz ders eklenmemiş. Yukarıdan ders seçin.';
+}else{
+Object.keys(aktifOgr.notlar).forEach(ders=>{
+let not=aktifOgr.notlar;
+let ort=ortalamaHesapla(not);
+html+=`<div class="ders-kart"><b>${ders}</b>
+<input type="number" id="${ders}_y1" min="0" max="100" placeholder="1. Yazılı" value="${not.y1}" onchange="notKaydet('${ders}','y1')">
+<input type="number" id="${ders}_y2" min="0" max="100" placeholder="2. Yazılı" value="${not.y2}" onchange="notKaydet('${ders}','y2')">
+<input type="number" id="${ders}_y3" min="0" max="100" placeholder="3. Yazılı" value="${not.y3}" onchange="notKaydet('${ders}','y3')">
+<input type="number" id="${ders}_y4" min="0" max="100" placeholder="4. Yazılı" value="${not.y4}" onchange="notKaydet('${ders}','y4')">
+<div class="ort">ORTALAMA: ${ort}</div></div>`;
+})}
+document.getElementById('dersler').innerHTML=html;
+}
+
+function cikisYap(){
+aktifOgr=null;aktifIndex=null;
+document.getElementById('panel').style.display='none';
+document.getElementById('giris').style.display='block';
+document.getElementById('ad').value='';
+document.getElementById('sifre').value='';
+}
+</script>
+</body>
+</html>
