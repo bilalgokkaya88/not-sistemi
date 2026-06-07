@@ -17,6 +17,7 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 .btn-kucuk{padding:6px 12px;margin:3px;font-size:13px;cursor:pointer;border-radius:5px;border:none}
 .btn-gor{background:#2196f3;color:white}
 .btn-sil{background:#f44336;color:white}
+.toplu-btn{margin-right:10px}
 @media print{body{background:white}.kutu{box-shadow:none}.sekme,button{display:none}}
 </style>
 </head>
@@ -52,17 +53,23 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 
 <div id="tab3" class="tab-icerik">
 <h3>Veli Girişlerini Takip Et</h3>
+<div style="margin-bottom:15px">
+<button onclick="topluSilSecili()" class="toplu-btn" style="background:#ff9800">🗑️ Seçili Öğrencileri Sil</button>
+<button onclick="topluSilHepsi()" class="toplu-btn" style="background:#d32f2f">⚠️ TÜM ÖĞRENCİLERİ SİL</button>
+</div>
 <div id="ogrListesi"></div>
 </div>
 </div>
 
 <script>
+const STORAGE_KEY = 'ogrenciler_v6';
+
 function ogrencileriGetir(){
-let veri = localStorage.getItem('ogrenciler') || localStorage.getItem('ogrenciler_v6') || '[]';
+let veri = localStorage.getItem(STORAGE_KEY) || '[]';
 try{return JSON.parse(veri);}catch(e){return [];}
 }
 function ogrencileriKaydet(liste){
-localStorage.setItem('ogrenciler_v6', JSON.stringify(liste));
+localStorage.setItem(STORAGE_KEY, JSON.stringify(liste));
 }
 
 function sekmeAc(n){
@@ -84,6 +91,7 @@ ogrencileriKaydet(ogrenciler);
 alert('Öğrenci eklendi!');
 document.getElementById('yeniAd').value='';
 document.getElementById('yeniSifre').value='';
+sekmeAc(3);
 }
 
 function listeleOgrenciler(){
@@ -93,27 +101,33 @@ let ogrListesi=document.getElementById('ogrListesi');
 ogrSec.innerHTML='';
 ogrListesi.innerHTML='';
 
+if(ogrenciler.length===0){
+ogrListesi.innerHTML='Henüz öğrenci yok';
+return;
+}
+
 ogrenciler.forEach((o,i)=>{
 ogrSec.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
 let dersSayisi=o.dersler?o.dersler.length:0;
 ogrListesi.innerHTML+=`<div class="ogr-kart">
+<input type="checkbox" class="secim" data-index="${i}" style="margin-right:10px">
 <b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}<br>
 <small>📚 ${dersSayisi} ders açılmış</small><br>
 <button class="btn-kucuk btn-gor" onclick="notlariGoster(${i})">👁️ Notları Gör</button>
-<button class="btn-kucuk btn-sil" onclick="ogrenciSil(${i})">🗑️ Öğrenci Sil</button>
+<button class="btn-kucuk btn-sil" onclick="ogrenciSil(${i})">🗑️ Tek Sil</button>
 </div>`;
 });
 }
 
 function notKaydet(){
-let idx=document.getElementById('ogrSec').value;
+let idx=parseInt(document.getElementById('ogrSec').value);
 let ders=document.getElementById('dersSec').value.trim();
 let puan=document.getElementById('puan').value;
 if(!ders||!puan||puan<0||puan>100){alert('Ders ve 0-100 arası not girin');return;}
 let ogrenciler=ogrencileriGetir();
 if(!ogrenciler[idx].dersler.includes(ders)) ogrenciler[idx].dersler.push(ders);
-if(!ogrenciler[idx].notlar[ders]) ogrenciler[idx].notlar[ders]={y1:'',y2:'',y3:'',y4:''};
-ogrenciler[idx].notlar[ders].y1=puan;
+if(!ogrenciler[idx].notlar) ogrenciler[idx].notlar={y1:'',y2:'',y3:'',y4:''};
+ogrenciler[idx].notlar.y1=puan;
 ogrencileriKaydet(ogrenciler);
 alert('Not kaydedildi!');
 document.getElementById('dersSec').value='';
@@ -128,7 +142,7 @@ if(!ogr.dersler||ogr.dersler.length===0){
 html+='Henüz ders eklenmemiş';
 }else{
 ogr.dersler.forEach(ders => {
-let not=ogr.notlar[ders]||{y1:'',y2:'',y3:'',y4:''};
+let not=ogr.notlar||{y1:'',y2:'',y3:'',y4:''};
 let notlarArr=[not.y1,not.y2,not.y3,not.y4].filter(n=>n!=='').map(Number);
 let ort=notlarArr.length>0?(notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1):'-';
 html+=`${ders}: 1.${not.y1||'-'} 2.${not.y2||'-'} 3.${not.y3||'-'} 4.${not.y4||'-'} | ORT: ${ort}\n`;
@@ -146,6 +160,29 @@ alert('Öğrenci silindi!');
 listeleOgrenciler();
 }
 
+function topluSilSecili(){
+let secilenler = document.querySelectorAll('.secim:checked');
+if(secilenler.length===0){alert('Önce silmek istediğin öğrencileri seç!');return;}
+if(!confirm(secilenler.length+' öğrenciyi silmek istiyor musun?')) return;
+
+let ogrenciler=ogrencileriGetir();
+let indexler = Array.from(secilenler).map(cb=>parseInt(cb.dataset.index)).sort((a,b)=>b-a);
+indexler.forEach(idx=>ogrenciler.splice(idx,1));
+
+ogrencileriKaydet(ogrenciler);
+alert(secilenler.length+' öğrenci silindi!');
+listeleOgrenciler();
+}
+
+function topluSilHepsi(){
+if(!confirm('⚠️ DİKKAT! Tüm öğrenciler ve veli girdiği tüm notlar silinecek!\nEmin misin?')) return;
+if(!confirm('Son kez soruyorum: GERÇEKTEN TÜM VERİLER SİLİNSİN Mİ?')) return;
+
+localStorage.removeItem(STORAGE_KEY);
+alert('Tüm öğrenciler silindi!');
+listeleOgrenciler();
+}
+
 function pdfIndir(){
 let ogrenciler = ogrencileriGetir();
 let html = `<h1 style="text-align:center">Öğrenci Not Listesi</h1><p style="text-align:center">Tarih: ${new Date().toLocaleDateString('tr-TR')}</p><hr>`;
@@ -157,7 +194,7 @@ html += '<p>Henüz ders yok</p>';
 }else{
 html += '<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%;margin-bottom:20px"><tr style="background:#667eea;color:white"><th>Ders</th><th>1.Yazılı</th><th>2.Yazılı</th><th>3.Yazılı</th><th>4.Yazılı</th><th>Ortalama</th></tr>';
 o.dersler.forEach(ders => {
-let not = o.notlar[ders]||{y1:'',y2:'',y3:'',y4:''};
+let not = o.notlar||{y1:'',y2:'',y3:'',y4:''};
 let notlarArr = [not.y1,not.y2,not.y3,not.y4].filter(n=>n!=='').map(Number);
 let ort = notlarArr.length>0? (notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1) : '-';
 html += `<tr><td><b>${ders}</b></td><td>${not.y1||'-'}</td><td>${not.y2||'-'}</td><td>${not.y3||'-'}</td><td>${not.y4||'-'}</td><td style="font-weight:bold;color:green">${ort}</td></tr>`;
