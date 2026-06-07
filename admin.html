@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial;background:#eef2f7;padding:20px;margin:0}
+.box{background:white;padding:25px;border-radius:12px;max-width:950px;margin:auto}
+h2{text-align:center;color:#2196F3}
+.tabs{display:flex;margin-bottom:20px;gap:5px}
+.tab{flex:1;padding:12px;cursor:pointer;border:none;background:#e0e0e0;border-radius:8px;font-weight:bold}
+.tab.active{background:#2196F3;color:white}
+.sekme{display:none}
+.sekme.aktif{display:block}
+input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box}
+button{background:#2196F3;color:white;border:none;cursor:pointer;font-weight:bold}
+.sil-btn{background:red;padding:6px 10px;font-size:12px}
+.sil-btn:hover{background:#c62828}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#2196F3;color:white}
+.mesaj{padding:12px;border-radius:6px;margin-top:10px;text-align:center;font-weight:bold}
+.basarili{background:#d4edda;color:#155724}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Admin Panel - Öğretmen</h2>
+<div class="tabs">
+<button class="tab aktif" onclick="sekme(1)">1. Notları Gör</button>
+<button class="tab" onclick="sekme(2)">2. Veli Şifre Oluştur</button>
+</div>
+
+<div id="sekme1" class="sekme aktif">
+<button onclick="listele()">Yenile / Listele</button>
+<div id="liste"><p style="text-align:center">Listele butonuna bas</p></div>
+</div>
+
+<div id="sekme2" class="sekme">
+<input type="text" id="ogrNo" placeholder="Öğrenci No - Örn: 101">
+<input type="text" id="ogrAd" placeholder="Ad Soyad - Küçük harf yaz">
+<input type="password" id="sifre" placeholder="Şifre - Sen belirle">
+<button onclick="veliEkle()">Şifre Oluştur</button>
+<div id="sonuc2"></div>
+</div>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwh3gRjMlIYTwGacxJnWLrK0mVouKAdyu8eAdO3bIFycVZNjjJLlU2H3Iknpp_zw1hc/exec";
+
+function sekme(n){
+document.querySelectorAll('.sekme').forEach(s=>s.classList.remove('aktif'));
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktif'));
+document.getElementById('sekme'+n).classList.add('aktif');
+document.querySelectorAll('.tab')[n-1].classList.add('aktif');
+}
+
+function listele(){
+liste.innerHTML = "<p style='text-align:center'>Yükleniyor...</p>";
+fetch(API_URL).then(r=>r.json()).then(data=>{
+if(data.length==0){liste.innerHTML="<p>Hiç kayıt yok</p>";return;}
+let ogrenciler = {};
+data.forEach((row, index)=>{
+let key = row[0] + " - " + row[1] + " - " + row[2];
+if(!ogrenciler[key]) ogrenciler[key] = [];
+ogrenciler[key].push({row: row, satir: index+2});
+let html = "";
+for(let ogr in ogrenciler){
+html += `<div style="border:2px solid #2196F3;border-radius:8px;margin:10px 0">
+<div style="background:#2196F3;color:white;padding:10px;cursor:pointer;font-weight:bold" onclick="acKapat('ogr${ogr}')">▶ ${ogr}</div>
+<div id="ogr${ogr}" style="display:none;padding:10px">
+<table><tr><th>Ders</th><th>1.Yazılı</th><th>2.Yazılı</th><th>3.Yazılı</th><th>4.Yazılı</th><th>Sil</th></tr>`;
+ogrenciler[ogr].forEach(item=>{
+let r = item.row;
+html += `<tr><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td>
+<td><button class="sil-btn" onclick="sil(${item.satir})">Sil</button></td></tr>`;
+});
+html += `</table></div></div>`;
+}
+liste.innerHTML = html;
+}).catch(err=>liste.innerHTML="Hata: "+err);
+}
+
+function acKapat(id){
+let el = document.getElementById(id);
+el.style.display = el.style.display == "none"? "block" : "none";
+event.target.innerHTML = el.style.display == "block"? event.target.innerHTML.replace("▶","▼") : event.target.innerHTML.replace("▼","▶");
+}
+
+function sil(satirNo){
+if(confirm("Silinsin mi?")){
+fetch(API_URL+"?del="+satirNo).then(r=>r.text()).then(()=>{alert("Silindi!");listele();});
+}
+}
+
+function veliEkle(){
+if(!ogrNo.value ||!ogrAd.value ||!sifre.value){
+sonuc2.innerHTML = "<div class='mesaj basarili'>Tüm alanları doldur</div>";return;
+}
+let adKucuk = ogrAd.value.toLowerCase().trim();
+sonuc2.innerHTML = `<div class='mesaj basarili'>
+✅ Veli Hesabı<br>
+Ad Soyad: ${adKucuk}<br>
+Şifre: ${sifre.value}<br><br>
+⚠️ Bunu kopyala > Code.gs > VELI_KULLANICILARI içine yapıştır > Kaydet > Dağıt > Yeni sürüm
+<br><code>"${adKucuk}": "${sifre.value}",</code>
+</div>`;
+}
+</script>
+</body>
+</html>

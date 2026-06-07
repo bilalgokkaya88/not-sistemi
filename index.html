@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Veli Giriş</title>
+<style>
+body{font-family:Arial;background:#e3f2fd;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.box{background:white;padding:30px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2);width:320px}
+h2{text-align:center;color:#2196F3;margin-bottom:20px}
+input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box}
+button{background:#2196F3;color:white;border:none;cursor:pointer;font-weight:bold}
+button:hover{background:#1976D2}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Veli Giriş Paneli</h2>
+<input type="text" id="ad" placeholder="Öğrenci Ad Soyad - Küçük harf">
+<input type="password" id="sifre" placeholder="Şifre">
+<button onclick="gir()">Giriş Yap</button>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwh3gRjMlIYTwGacxJnWLrK0mVouKAdyu8eAdO3bIFycVZNjjJLlU2H3Iknpp_zw1hc/exec";
+
+function gir(){
+let ad = document.getElementById('ad').value.toLowerCase().trim();
+let sifre = document.getElementById('sifre').value;
+if(!ad ||!sifre){alert("Lütfen ad soyad ve şifre gir");return;}
+fetch(API_URL+"?login=1&ad="+encodeURIComponent(ad)+"&sifre="+encodeURIComponent(sifre))
+.then(r=>r.text()).then(t=>{
+if(t=="OK"){
+localStorage.setItem("veliAd", ad);
+window.location="veli-panel.html";
+} else {
+alert("Ad Soyad veya şifre hatalı!");
+}
+}).catch(err=>alert("Hata: "+err));
+}
+</script>
+</body>
+</html>

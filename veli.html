@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Not Girişi</title>
+<style>
+body{font-family:Arial;background:#f5f5f5;padding:20px}
+.box{background:white;padding:25px;border-radius:10px;max-width:450px;margin:auto;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+h2{text-align:center;color:#2196F3}
+input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:6px;font-size:15px;box-sizing:border-box}
+button{background:#4CAF50;color:white;border:none;cursor:pointer;font-weight:bold}
+button:hover{background:#45a049}
+.mesaj{padding:12px;border-radius:6px;margin-top:10px;text-align:center;font-weight:bold}
+.basarili{background:#d4edda;color:#155724}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Not Girişi</h2>
+<input type="text" id="no" placeholder="Öğrenci No - Örn: 101">
+<input type="text" id="ad" placeholder="Ad Soyad">
+<input type="text" id="sinif" placeholder="Sınıf - Örn: 8-A">
+<input type="text" id="ders" placeholder="Ders - Örn: Matematik">
+<input type="number" id="not1" placeholder="1. Yazılı" min="0" max="100">
+<input type="number" id="not2" placeholder="2. Yazılı" min="0" max="100">
+<input type="number" id="not3" placeholder="3. Yazılı" min="0" max="100">
+<input type="number" id="not4" placeholder="4. Yazılı" min="0" max="100">
+<button onclick="kaydet()">Kaydet</button>
+<div id="sonuc"></div>
+<button onclick="cikis()" style="background:#f44336;margin-top:15px">Çıkış Yap</button>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwh3gRjMlIYTwGacxJnWLrK0mVouKAdyu8eAdO3bIFycVZNjjJLlU2H3Iknpp_zw1hc/exec";
+
+if(!localStorage.getItem("veliAd")) window.location="index.html";
+document.getElementById('ad').value = localStorage.getItem("veliAd");
+
+function kaydet(){
+const data = {
+no: no.value.trim(),
+ad: ad.value.trim(),
+sinif: sinif.value.trim(),
+ders: ders.value.trim(),
+not1: not1.value,
+not2: not2.value,
+not3: not3.value,
+not4: not4.value
+};
+if(!data.no ||!data.ders){sonuc.innerHTML="<div class='mesaj basarili'>No ve Ders zorunlu</div>";return;}
+sonuc.innerHTML = "Kaydediliyor...";
+fetch(API_URL, {method: "POST", body: JSON.stringify(data)})
+.then(r=>r.text()).then(t=>{
+sonuc.innerHTML = "<div class='mesaj basarili'>✅ "+t+" - "+data.ders+"</div>";
+document.querySelectorAll('input[type=number]').forEach(i=>i.value='');
+}).catch(err=>sonuc.innerHTML="Hata: "+err);
+}
+
+function cikis(){
+localStorage.removeItem("veliAd");
+window.location="index.html";
+}
+</script>
+</body>
+</html>
