@@ -2,247 +2,130 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Veli Paneli</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{font-family:Arial;background:#667eea;padding:20px}
-.kutu{background:white;padding:25px;border-radius:15px;max-width:900px;margin:auto}
-input,select,textarea{padding:10px;margin:5px;border:2px solid #ddd;border-radius:8px}
-button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radius:8px;cursor:pointer;margin:5px}
-.tab-btn{background:#999;margin:5px 2px}
-.tab-btn.aktif{background:#4caf50}
-.tab-content{display:none;margin-top:20px}
-.tab-content.aktif{display:block}
-.ogr-kart{border:1px solid #ddd;padding:10px;margin:5px 0;border-radius:8px;background:#f9f9f9}
-.btn-kucuk{padding:5px 10px;font-size:12px;width:auto}
-.btn-sil{background:#f44336}
-.btn-gor{background:#2196F3}
+body{margin:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:Arial;padding:20px}
+.kutu{background:white;padding:30px;border-radius:15px;width:100%;max-width:500px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+h2{color:#667eea;text-align:center;margin-top:0}
+input{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:16px}
+button{width:100%;padding:14px;background:#4caf50;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold;margin-top:10px}
+button:hover{background:#45a049}
+.hata{color:red;background:#ffe6e6;padding:10px;border-radius:8px;margin-top:10px;text-align:center;display:none}
+.not-karti{border:2px solid #667eea;padding:15px;margin:12px 0;border-radius:10px;background:#f8f9ff}
+.ort{font-size:18px;font-weight:bold;color:#4caf50;text-align:center;margin-top:10px}
+.duyuru{border:3px solid #ff9800;padding:15px;margin:15px 0;border-radius:12px;background:#fff3e0;border-left:6px solid #ff9800;animation:yanipSon 2s}
+@keyframes yanipSon{0%,100%{opacity:1}50%{opacity:0.7}}
+.duyuru-tarih{font-size:12px;color:#666;margin-bottom:5px}
 </style>
 </head>
 <body>
-<div class="kutu">
-<h2>👨‍🏫 Admin Panel</h2>
-
-<button class="tab-btn aktif" onclick="sekmeAc('ekle',this)">➕ Öğrenci Ekle</button>
-<button class="tab-btn" onclick="sekmeAc('ders',this)">📚 Ders Ekle</button>
-<button class="tab-btn" onclick="sekmeAc('liste',this)">👥 Öğrenci Listesi</button>
-<button class="tab-btn" onclick="sekmeAc('not',this)">📝 Toplu Not Girişi</button>
-<button class="tab-btn" onclick="sekmeAc('duyuru',this)">📢 Duyuru</button>
-
-<!-- 1. SEKME -->
-<div id="ekle" class="tab-content aktif">
-<h3>Öğrenci Ekle</h3>
-<select id="sinif">
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
-<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
-<option>11. Sınıf</option><option>12. Sınıf</option>
-</select>
-<input type="text" id="ad" placeholder="Ad Soyad">
-<input type="password" id="sifre" placeholder="Şifre">
-<button onclick="ogrenciEkle()">Ekle</button>
+<div class="kutu" id="giris">
+<h2>📝 Veli Girişi</h2>
+<input type="text" id="ad" placeholder="Öğrenci Ad Soyad" required>
+<input type="password" id="sifre" placeholder="Şifre" required>
+<button onclick="giris()">Giriş Yap</button>
+<div class="hata" id="hata">Bilgiler hatalı! Ad soyad ve şifreyi kontrol edin.</div>
 </div>
 
-<!-- 2. SEKME -->
-<div id="ders" class="tab-content">
-<h3>Sınıfa Ders Ekle</h3>
-<select id="dersSinif">
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
-<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
-<option>11. Sınıf</option><option>12. Sınıf</option>
-</select>
-<input type="text" id="dersAdi" placeholder="Ders Adı">
-<button onclick="dersEkle()">Ders Ekle</button>
-<div id="dersListesi" style="margin-top:15px"></div>
-</div>
+<div class="kutu" id="panel" style="display:none">
+<h2>Merhaba <span id="ogrAd"></span> Velisi</h2>
+<p style="color:#666;text-align:center;margin-top:-10px"><span id="ogrSinif"></span></p>
+<button onclick="cikis()" style="background:#f44336">Çıkış Yap</button>
 
-<!-- 3. SEKME -->
-<div id="liste" class="tab-content">
-<h3>Öğrenci Listesi</h3>
-<button onclick="listeleOgrenciler()">Yenile</button>
-<div id="ogrListesi"></div>
-</div>
+<!-- DUYURU ALANI -->
+<div id="duyuruAlani"></div>
 
-<!-- 4. SEKME: TOPLU NOT GİRİŞİ -->
-<div id="not" class="tab-content">
-<h3>📝 Toplu Not Girişi - Eksik Tamamlama</h3>
-<select id="notSinif" onchange="sinifOgrencileriYukle()">
-<option>Sınıf seç...</option>
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
-<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
-<option>11. Sınıf</option><option>12. Sınıf</option>
-</select>
-<select id="notOgrenci" disabled>
-<option>Önce sınıf seç...</option>
-</select>
-<div id="notGirisAlani" style="display:none;margin-top:15px">
-<select id="notDers"><option>Ders seç...</option></select>
-<input type="number" id="not1" placeholder="1.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not2" placeholder="2.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not3" placeholder="3.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not4" placeholder="4.Yazılı" min="0" max="100" style="width:80px">
-<button onclick="notKaydetAdmin()" style="background:#2196F3">Kaydet</button>
-</div>
-<div id="mevcutNotlar" style="margin-top:15px"></div>
-</div>
-
-<!-- 5. SEKME: DUYURU -->
-<div id="duyuru" class="tab-content">
-<h3>📢 Sınıf Duyurusu</h3>
-<select id="duyuruSinif">
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
-<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
-<option>11. Sınıf</option><option>12. Sınıf</option>
-</select><br>
-<input type="text" id="duyuruBaslik" placeholder="Başlık" style="width:100%;margin:8px 0">
-<textarea id="duyuruMetin" placeholder="Duyuru metni..." style="width:100%;height:80px"></textarea><br>
-<button onclick="duyuruGonder()" style="background:#ff9800">Yayınla</button>
-</div>
+<h3 style="margin-top:25px;color:#333">📊 Not Bilgileri - 4 Yazılı</h3>
+<div id="notlar">Yükleniyor...</div>
 </div>
 
 <script>
 const STORAGE='ogrenciler_v6';
-const DERS_KEY='sinif_dersleri_v2';
+let aktifOgr=null;
 
-function sekmeAc(id,btn){
-document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('aktif'));
-document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
-document.getElementById(id).classList.add('aktif');
-btn.classList.add('aktif');
-if(id==='liste')listeleOgrenciler();
-if(id==='ders')dersListele();
+function ogrencileriGetir(){
+return JSON.parse(localStorage.getItem(STORAGE)||'[]');
 }
 
-function ogrencileriGetir(){return JSON.parse(localStorage.getItem(STORAGE)||'[]')}
-function ogrencileriKaydet(l){localStorage.setItem(STORAGE,JSON.stringify(l))}
+function giris(){
+let ad=document.getElementById('ad').value.trim().toLowerCase();
+let sifre=document.getElementById('sifre').value.trim();
+document.getElementById('hata').style.display='none';
 
-function ogrenciEkle(){
-let sinif=document.getElementById('sinif').value;
-let ad=document.getElementById('ad').value.trim();
-let sifre=document.getElementById('sifre').value;
-if(!ad||!sifre){alert('Doldurun');return;}
 let ogrenciler=ogrencileriGetir();
-if(ogrenciler.find(o=>o.ad===ad)){alert('Bu öğrenci var');return;}
-ogrenciler.push({ad:ad,sinif:sinif,sifre:sifre,notlar:{}});
-ogrencileriKaydet(ogrenciler);
-alert('Eklendi');
+aktifOgr=ogrenciler.find(o=>o.ad.toLowerCase()===ad && o.sifre===sifre);
+
+if(aktifOgr){
+document.getElementById('giris').style.display='none';
+document.getElementById('panel').style.display='block';
+document.getElementById('ogrAd').innerText=aktifOgr.ad;
+document.getElementById('ogrSinif').innerText=aktifOgr.sinif;
+notlariGoster();
+duyuruGoster();
+}else{
+document.getElementById('hata').style.display='block';
+}
+}
+
+function duyuruGoster(){
+// Son duyuruyu al
+let duyurular=JSON.parse(localStorage.getItem('duyurular')||'[]');
+let sinifDuyurular=duyurular.filter(d=>d.sinif===aktifOgr.sinif);
+let sonDuyuru=sinifDuyurular.pop(); // en son eklenen
+
+let alan=document.getElementById('duyuruAlani');
+if(sonDuyuru){
+alan.innerHTML=`<div class="duyuru">
+<div class="duyuru-tarih">📅 ${sonDuyuru.tarih}</div>
+<b>📢 ${sonDuyuru.baslik}</b><br>
+${sonDuyuru.metin}
+</div>`;
+}else{
+alan.innerHTML='';
+}
+}
+
+function ortalamaHesapla(not){
+let notlarArr=[not.y1,not.y2,not.y3,not.y4].filter(n=>n!==''&&!isNaN(n)).map(Number);
+if(notlarArr.length===0)return'-';
+return (notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1);
+}
+
+function notlariGoster(){
+let html='';
+let notlar=aktifOgr.notlar||{};
+
+if(Object.keys(notlar).length===0){
+html='<div style="text-align:center;color:#999;padding:20px">Henüz ders eklenmemiş</div>';
+}else{
+Object.keys(notlar).forEach(ders=>{
+let n=notlar;
+let ort=ortalamaHesapla(n);
+html+=`<div class="not-karti">
+<b style="font-size:16px">${ders}</b><br>
+1.Yazılı: <b>${n.y1||'-'}</b> | 2.Yazılı: <b>${n.y2||'-'}</b><br>
+3.Yazılı: <b>${n.y3||'-'}</b> | 4.Yazılı: <b>${n.y4||'-'}</b>
+<div class="ort">ORTALAMA: ${ort}</div>
+</div>`;
+});
+}
+document.getElementById('notlar').innerHTML=html;
+}
+
+function cikis(){
+aktifOgr=null;
+document.getElementById('panel').style.display='none';
+document.getElementById('giris').style.display='block';
 document.getElementById('ad').value='';
 document.getElementById('sifre').value='';
+document.getElementById('hata').style.display='none';
 }
 
-function dersEkle(){
-let sinif=document.getElementById('dersSinif').value;
-let ders=document.getElementById('dersAdi').value.trim();
-if(!ders){alert('Ders adı yazın');return;}
-let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
-if(!dersler[sinif])dersler[sinif]=[];
-if(dersler[sinif].includes(ders)){alert('Ders var');return;}
-dersler[sinif].push(ders);
-localStorage.setItem(DERS_KEY,JSON.stringify(dersler));
-alert('Ders eklendi');
-document.getElementById('dersAdi').value='';
-dersListele();
-}
-
-function dersListele(){
-let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
-let html='';
-Object.keys(dersler).forEach(s=>{
-html+=`<b>${s}:</b> ${dersler[s].join(', ')}<br>`;
+// Enter ile giriş
+document.getElementById('sifre').addEventListener('keypress',function(e){
+if(e.key==='Enter')giris();
 });
-document.getElementById('dersListesi').innerHTML=html||'Ders yok';
-}
-
-// SIRALI LİSTELEME
-function listeleOgrenciler(){
-let ogrenciler=ogrencileriGetir();
-ogrenciler.sort((a,b)=>{
-if(a.sinif!==b.sinif)return a.sinif.localeCompare(b.sinif);
-let ortA=tumOrtalama(a),ortB=tumOrtalama(b);
-return ortB-ortA;
-});
-let html='';
-ogrenciler.forEach(o=>{
-html+=`<div class="ogr-kart"><b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}</div>`;
-});
-document.getElementById('ogrListesi').innerHTML=html||'Öğrenci yok';
-}
-
-function tumOrtalama(ogr){
-if(!ogr.notlar)return'-';
-let tum=[];
-Object.values(ogr.notlar).forEach(n=>{
-[not.y1,not.y2,not.y3,not.y4].forEach(x=>{if(x!==''&&!isNaN(x))tum.push(Number(x))});
-if(tum.length===0)return'-';
-return (tum.reduce((a,b)=>a+b,0)/tum.length).toFixed(1);
-}
-
-// TOPLU NOT GİRİŞİ
-function sinifOgrencileriYukle(){
-let sinif=document.getElementById('notSinif').value;
-let ogrenciler=ogrencileriGetir().filter(o=>o.sinif===sinif);
-let sel=document.getElementById('notOgrenci');
-sel.innerHTML='<option>Öğrenci seç...</option>';
-sel.disabled=false;
-ogrenciler.forEach(o=>sel.innerHTML+=`<option>${o.ad}</option>`);
-sel.onchange=ogrenciSec;
-}
-
-function ogrenciSec(){
-let ad=document.getElementById('notOgrenci').value;
-let ogr=ogrencileriGetir().find(o=>o.ad===ad);
-if(!ogr)return;
-document.getElementById('notGirisAlani').style.display='block';
-let dersSel=document.getElementById('notDers');
-dersSel.innerHTML='<option>Ders seç...</option>';
-Object.keys(ogr.notlar||{}).forEach(d=>dersSel.innerHTML+=`<option>${d}</option>`);
-let html='<b>Mevcut Notlar:</b><br>';
-Object.keys(ogr.notlar||{}).forEach(d=>{
-let n=ogr.notlar;
-html+=`${d}: ${n.y1||'-'}|${n.y2||'-'}|${n.y3||'-'}|${n.y4||'-'}<br>`;
-});
-document.getElementById('mevcutNotlar').innerHTML=html;
-dersSel.onchange=dersSec;
-}
-
-function dersSec(){
-let ad=document.getElementById('notOgrenci').value;
-let ders=document.getElementById('notDers').value;
-let ogr=ogrencileriGetir().find(o=>o.ad===ad);
-let n=ogr.notlar||{y1:'',y2:'',y3:'',y4:''};
-document.getElementById('not1').value=n.y1||'';
-document.getElementById('not2').value=n.y2||'';
-document.getElementById('not3').value=n.y3||'';
-document.getElementById('not4').value=n.y4||'';
-}
-
-function notKaydetAdmin(){
-let ad=document.getElementById('notOgrenci').value;
-let ders=document.getElementById('notDers').value;
-if(ders==='Ders seç...'){alert('Ders seçin');return;}
-let ogrenciler=ogrencileriGetir();
-let idx=ogrenciler.findIndex(o=>o.ad===ad);
-if(!ogrenciler[idx].notlar)ogrenciler[idx].notlar={};
-ogrenciler[idx].notlar[y1]=document.getElementById('not1').value;
-ogrenciler[idx].notlar[y2]=document.getElementById('not2').value;
-ogrenciler[idx].notlar[y3]=document.getElementById('not3').value;
-ogrenciler[idx].notlar[y4]=document.getElementById('not4').value;
-ogrencileriKaydet(ogrenciler);
-alert('Kaydedildi!');
-ogrenciSec();
-}
-
-// DUYURU
-function duyuruGonder(){
-let sinif=document.getElementById('duyuruSinif').value;
-let baslik=document.getElementById('duyuruBaslik').value;
-let metin=document.getElementById('duyuruMetin').value;
-if(!baslik||!metin){alert('Doldurun');return;}
-let duyurular=JSON.parse(localStorage.getItem('duyurular')||'[]');
-duyurular.push({sinif,baslik,metin,tarih:new Date().toLocaleDateString('tr-TR')});
-localStorage.setItem('duyurular',JSON.stringify(duyurular));
-alert('Duyuru yayınlandı!');
-document.getElementById('duyuruBaslik').value='';
-document.getElementById('duyuruMetin').value='';
-}
 </script>
 </body>
 </html>
