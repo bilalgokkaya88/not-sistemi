@@ -13,7 +13,7 @@ button{width:100%;padding:14px;background:#4caf50;color:white;border:none;border
 .hata{color:red;background:#ffe6e6;padding:10px;border-radius:8px;margin-top:10px;text-align:center;display:none}
 .ders-kart{border:2px solid #667eea;padding:15px;margin:10px 0;border-radius:10px;background:#f8f9ff}
 .ort{font-size:20px;font-weight:bold;color:#4caf50;text-align:center;margin-top:10px}
-.btn-sil{padding:5px 10px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px}
+.btn-sil{padding:5px 10px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;float:right}
 .bolum{border-top:2px solid #eee;padding-top:15px;margin-top:15px}
 </style>
 </head>
@@ -50,14 +50,15 @@ button{width:100%;padding:14px;background:#4caf50;color:white;border:none;border
 <script>
 let aktifOgr = null;
 let aktifIndex = null;
+const STORAGE_KEY = 'ogrenciler_v6';
 
 function ogrencileriGetir(){
-let veri = localStorage.getItem('ogrenciler') || localStorage.getItem('ogrenciler_v6') || '[]';
+let veri = localStorage.getItem(STORAGE_KEY) || '[]';
 try{return JSON.parse(veri);}catch(e){return [];}
 }
 
 function ogrencileriKaydet(liste){
-localStorage.setItem('ogrenciler_v6', JSON.stringify(liste));
+localStorage.setItem(STORAGE_KEY, JSON.stringify(liste));
 }
 
 function girisYap(){
@@ -114,7 +115,7 @@ function dersSil(ders){
 if(!confirm(ders+' dersini silmek istiyor musun?')) return;
 let ogrenciler = ogrencileriGetir();
 ogrenciler[aktifIndex].dersler = ogrenciler[aktifIndex].dersler.filter(d => d!== ders);
-delete ogrenciler[aktifIndex].notlar[ders];
+delete ogrenciler[aktifIndex].notlar;
 ogrencileriKaydet(ogrenciler);
 aktifOgr = ogrenciler[aktifIndex];
 dersleriListele();
