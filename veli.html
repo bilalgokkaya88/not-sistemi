@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Veli Paneli</title>
+<title>Veli Paneli v38</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{margin:0;font-family:Arial;background:#667eea;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:15px}
@@ -16,8 +16,8 @@ button{width:100%;padding:15px;background:#4caf50;color:white;border:none;border
 </head>
 <body>
 <div class="kutu" id="giris">
-<h2>📱 Veli Girişi</h2>
-<input id="tel" type="tel" placeholder="Telefon 05321234567" inputmode="numeric">
+<h2>📱 Veli Girişi v38</h2>
+<input id="tel" type="tel" placeholder="Telefon 05510447940" inputmode="numeric">
 <input id="sifre" type="password" placeholder="Şifre">
 <button onclick="giris()">Giriş Yap</button>
 <div id="hata" class="hata"></div>
@@ -34,13 +34,16 @@ button{width:100%;padding:15px;background:#4caf50;color:white;border:none;border
 
 <script>
 let ogrenciler=[];
-fetch('ogrenciler.json').then(r=>r.json()).then(d=>ogrenciler=d).catch(()=>document.getElementById('hata').innerText='Sistem hatası!');
 let duyurular=[];
-fetch('duyurular.json').then(r=>r.json()).then(d=>duyurular=d);
+
+fetch('ogrenciler.json?v='+Date.now()).then(r=>r.json()).then(d=>ogrenciler=d).catch(()=>{});
+fetch('duyurular.json?v='+Date.now()).then(r=>r.json()).then(d=>duyurular=d).catch(()=>{});
 
 function giris(){
 let tel=document.getElementById('tel').value.replace(/\s/g,'');
-let sifre=document.getElementById('sifre').value;
+if(tel.length==10 && tel[0]!='0') tel = '0' + tel;
+let sifre=document.getElementById('sifre').value.trim();
+
 let o=ogrenciler.find(x=>x.tel==tel && x.sifre==sifre);
 if(o){
 document.getElementById('giris').style.display='none';
@@ -49,7 +52,9 @@ document.getElementById('ogrAd').innerText=o.ad;
 document.getElementById('ogrSinif').innerText=o.sinif;
 notGoster(o);
 duyGoster(o.sinif);
-}else{document.getElementById('hata').innerText='Telefon veya şifre hatalı!'}
+}else{
+document.getElementById('hata').innerText='Telefon veya şifre hatalı!';
+}
 }
 
 function notGoster(o){
