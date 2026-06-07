@@ -2,33 +2,40 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Admin Panel v26</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{font-family:Arial;background:#667eea;padding:20px}
-.kutu{background:white;padding:25px;border-radius:15px;max-width:900px;margin:auto}
-input,select,textarea{padding:10px;margin:5px;border:2px solid #ddd;border-radius:8px}
-button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radius:8px;cursor:pointer;margin:5px}
-.tab-btn{background:#999;margin:5px 2px}
-.tab-btn.aktif{background:#4caf50}
-.tab-content{display:none;margin-top:20px}
-.tab-content.aktif{display:block}
-.ogr-kart{border:1px solid #ddd;padding:10px;margin:5px 0;border-radius:8px;background:#f9f9f9}
-.btn-kucuk{padding:5px 10px;font-size:12px;width:auto}
-.btn-sil{background:#f44336}
-.btn-gor{background:#2196F3}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:20px;min-height:100vh}
+.kutu{background:white;padding:30px;border-radius:15px;max-width:950px;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+h2{color:#667eea;margin-top:0;text-align:center}
+.tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;border-bottom:2px solid #eee;padding-bottom:10px}
+.tab-btn{flex:1;min-width:150px;padding:12px;background:#ddd;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:0.3s}
+.tab-btn.aktif{background:#4caf50;color:white}
+.tab-content{display:none}
+.tab-content.aktif{display:block;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+input,select,textarea{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:8px;font-size:15px}
+button.ekle{background:#4caf50;color:white;border:none;padding:12px 25px;border-radius:8px;cursor:pointer;font-weight:bold;margin-top:10px}
+button.ekle:hover{background:#45a049}
+.ogr-kart{background:#f5f5f5;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid #667eea}
+.basari{color:green;background:#e8f5e9;padding:10px;border-radius:8px;margin-top:10px}
+.hata{color:red;background:#ffe6e6;padding:10px;border-radius:8px;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>👨‍🏫 Admin Panel</h2>
+<h2>👨‍🏫 Admin Panel v26</h2>
 
-<button class="tab-btn aktif" onclick="sekmeAc('ekle',this)">➕ Öğrenci Ekle</button>
-<button class="tab-btn" onclick="sekmeAc('ders',this)">📚 Ders Ekle</button>
-<button class="tab-btn" onclick="sekmeAc('liste',this)">👥 Öğrenci Listesi</button>
-<button class="tab-btn" onclick="sekmeAc('not',this)">📝 Toplu Not Girişi</button>
-<button class="tab-btn" onclick="sekmeAc('duyuru',this)">📢 Duyuru</button>
+<div class="tabs">
+<button class="tab-btn aktif" onclick="sekmeDegistir('ekle',this)">➕ Öğrenci Ekle</button>
+<button class="tab-btn" onclick="sekmeDegistir('ders',this)">📚 Ders Ekle</button>
+<button class="tab-btn" onclick="sekmeDegistir('liste',this)">👥 Öğrenci Listesi</button>
+<button class="tab-btn" onclick="sekmeDegistir('not',this)">📝 Toplu Not Girişi</button>
+<button class="tab-btn" onclick="sekmeDegistir('duyuru',this)">📢 Duyuru</button>
+</div>
 
-<!-- 1. SEKME -->
+<!-- 1. ÖĞRENCİ EKLE -->
 <div id="ekle" class="tab-content aktif">
 <h3>Öğrenci Ekle</h3>
 <select id="sinif">
@@ -38,10 +45,11 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 </select>
 <input type="text" id="ad" placeholder="Ad Soyad">
 <input type="password" id="sifre" placeholder="Şifre">
-<button onclick="ogrenciEkle()">Ekle</button>
+<button class="ekle" onclick="ogrenciEkle()">Ekle</button>
+<div id="ekleMesaj"></div>
 </div>
 
-<!-- 2. SEKME -->
+<!-- 2. DERS EKLE -->
 <div id="ders" class="tab-content">
 <h3>Sınıfa Ders Ekle</h3>
 <select id="dersSinif">
@@ -49,21 +57,21 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 <option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
 <option>11. Sınıf</option><option>12. Sınıf</option>
 </select>
-<input type="text" id="dersAdi" placeholder="Ders Adı">
-<button onclick="dersEkle()">Ders Ekle</button>
+<input type="text" id="dersAdi" placeholder="Ders Adı: Matematik">
+<button class="ekle" onclick="dersEkle()">Ders Ekle</button>
 <div id="dersListesi" style="margin-top:15px"></div>
 </div>
 
-<!-- 3. SEKME -->
+<!-- 3. LİSTE -->
 <div id="liste" class="tab-content">
 <h3>Öğrenci Listesi</h3>
-<button onclick="listeleOgrenciler()">Yenile</button>
-<div id="ogrListesi"></div>
+<button class="ekle" onclick="listeleOgrenciler()">Listeyi Yenile</button>
+<div id="ogrListesi" style="margin-top:15px"></div>
 </div>
 
-<!-- 4. SEKME: TOPLU NOT GİRİŞİ -->
+<!-- 4. TOPLU NOT -->
 <div id="not" class="tab-content">
-<h3>📝 Toplu Not Girişi - Eksik Tamamlama</h3>
+<h3>📝 Toplu Not Girişi</h3>
 <select id="notSinif" onchange="sinifOgrencileriYukle()">
 <option>Sınıf seç...</option>
 <option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
@@ -75,34 +83,37 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 </select>
 <div id="notGirisAlani" style="display:none;margin-top:15px">
 <select id="notDers"><option>Ders seç...</option></select>
-<input type="number" id="not1" placeholder="1.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not2" placeholder="2.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not3" placeholder="3.Yazılı" min="0" max="100" style="width:80px">
-<input type="number" id="not4" placeholder="4.Yazılı" min="0" max="100" style="width:80px">
-<button onclick="notKaydetAdmin()" style="background:#2196F3">Kaydet</button>
+<div style="display:flex;gap:5px;flex-wrap:wrap">
+<input type="number" id="not1" placeholder="1.Yazılı" min="0" max="100" style="flex:1">
+<input type="number" id="not2" placeholder="2.Yazılı" min="0" max="100" style="flex:1">
+<input type="number" id="not3" placeholder="3.Yazılı" min="0" max="100" style="flex:1">
+<input type="number" id="not4" placeholder="4.Yazılı" min="0" max="100" style="flex:1">
+</div>
+<button class="ekle" onclick="notKaydetAdmin()" style="background:#2196F3">Kaydet</button>
 </div>
 <div id="mevcutNotlar" style="margin-top:15px"></div>
 </div>
 
-<!-- 5. SEKME: DUYURU -->
+<!-- 5. DUYURU -->
 <div id="duyuru" class="tab-content">
 <h3>📢 Sınıf Duyurusu</h3>
 <select id="duyuruSinif">
 <option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
 <option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
 <option>11. Sınıf</option><option>12. Sınıf</option>
-</select><br>
-<input type="text" id="duyuruBaslik" placeholder="Başlık" style="width:100%;margin:8px 0">
-<textarea id="duyuruMetin" placeholder="Duyuru metni..." style="width:100%;height:80px"></textarea><br>
-<button onclick="duyuruGonder()" style="background:#ff9800">Yayınla</button>
+</select>
+<input type="text" id="duyuruBaslik" placeholder="Başlık: Yazılı Tarihleri">
+<textarea id="duyuruMetin" placeholder="Duyuru metnini yazın..." rows="4"></textarea>
+<button class="ekle" onclick="duyuruGonder()" style="background:#ff9800">Yayınla</button>
 </div>
+
 </div>
 
 <script>
 const STORAGE='ogrenciler_v6';
 const DERS_KEY='sinif_dersleri_v2';
 
-function sekmeAc(id,btn){
+function sekmeDegistir(id,btn){
 document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('aktif'));
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
 document.getElementById(id).classList.add('aktif');
@@ -111,19 +122,32 @@ if(id==='liste')listeleOgrenciler();
 if(id==='ders')dersListele();
 }
 
-function ogrencileriGetir(){return JSON.parse(localStorage.getItem(STORAGE)||'[]')}
-function ogrencileriKaydet(l){localStorage.setItem(STORAGE,JSON.stringify(l))}
+function ogrencileriGetir(){
+return JSON.parse(localStorage.getItem(STORAGE)||'[]');
+}
+function ogrencileriKaydet(l){
+localStorage.setItem(STORAGE,JSON.stringify(l));
+}
 
 function ogrenciEkle(){
 let sinif=document.getElementById('sinif').value;
 let ad=document.getElementById('ad').value.trim();
 let sifre=document.getElementById('sifre').value;
-if(!ad||!sifre){alert('Doldurun');return;}
+let msg=document.getElementById('ekleMesaj');
+msg.innerHTML='';
+
+if(!ad||!sifre){
+msg.innerHTML='<div class="hata">Ad ve şifre boş olamaz!</div>';
+return;
+}
 let ogrenciler=ogrencileriGetir();
-if(ogrenciler.find(o=>o.ad===ad)){alert('Bu öğrenci var');return;}
+if(ogrenciler.find(o=>o.ad===ad)){
+msg.innerHTML='<div class="hata">Bu öğrenci zaten kayıtlı!</div>';
+return;
+}
 ogrenciler.push({ad:ad,sinif:sinif,sifre:sifre,notlar:{}});
 ogrencileriKaydet(ogrenciler);
-alert('Eklendi');
+msg.innerHTML='<div class="basari">✓ Öğrenci eklendi</div>';
 document.getElementById('ad').value='';
 document.getElementById('sifre').value='';
 }
@@ -134,7 +158,7 @@ let ders=document.getElementById('dersAdi').value.trim();
 if(!ders){alert('Ders adı yazın');return;}
 let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
 if(!dersler[sinif])dersler[sinif]=[];
-if(dersler[sinif].includes(ders)){alert('Ders var');return;}
+if(dersler[sinif].includes(ders)){alert('Bu ders zaten var');return;}
 dersler[sinif].push(ders);
 localStorage.setItem(DERS_KEY,JSON.stringify(dersler));
 alert('Ders eklendi');
@@ -145,37 +169,30 @@ dersListele();
 function dersListele(){
 let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
 let html='';
+if(Object.keys(dersler).length===0){
+html='Henüz ders eklenmemiş';
+}else{
 Object.keys(dersler).forEach(s=>{
-html+=`<b>${s}:</b> ${dersler[s].join(', ')}<br>`;
+html+=`<div class="ogr-kart"><b>${s}</b>: ${dersler[s].join(', ')}</div>`;
 });
-document.getElementById('dersListesi').innerHTML=html||'Ders yok';
+}
+document.getElementById('dersListesi').innerHTML=html;
 }
 
-// SIRALI LİSTELEME
 function listeleOgrenciler(){
 let ogrenciler=ogrencileriGetir();
-ogrenciler.sort((a,b)=>{
-if(a.sinif!==b.sinif)return a.sinif.localeCompare(b.sinif);
-let ortA=tumOrtalama(a),ortB=tumOrtalama(b);
-return ortB-ortA;
-});
+ogrenciler.sort((a,b)=>a.sinif.localeCompare(b.sinif,'tr'));
 let html='';
+if(ogrenciler.length===0){
+html='Kayıtlı öğrenci yok';
+}else{
 ogrenciler.forEach(o=>{
 html+=`<div class="ogr-kart"><b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}</div>`;
 });
-document.getElementById('ogrListesi').innerHTML=html||'Öğrenci yok';
+}
+document.getElementById('ogrListesi').innerHTML=html;
 }
 
-function tumOrtalama(ogr){
-if(!ogr.notlar)return'-';
-let tum=[];
-Object.values(ogr.notlar).forEach(n=>{
-[not.y1,not.y2,not.y3,not.y4].forEach(x=>{if(x!==''&&!isNaN(x))tum.push(Number(x))});
-if(tum.length===0)return'-';
-return (tum.reduce((a,b)=>a+b,0)/tum.length).toFixed(1);
-}
-
-// TOPLU NOT GİRİŞİ
 function sinifOgrencileriYukle(){
 let sinif=document.getElementById('notSinif').value;
 let ogrenciler=ogrencileriGetir().filter(o=>o.sinif===sinif);
@@ -197,9 +214,9 @@ Object.keys(ogr.notlar||{}).forEach(d=>dersSel.innerHTML+=`<option>${d}</option>
 let html='<b>Mevcut Notlar:</b><br>';
 Object.keys(ogr.notlar||{}).forEach(d=>{
 let n=ogr.notlar;
-html+=`${d}: ${n.y1||'-'}|${n.y2||'-'}|${n.y3||'-'}|${n.y4||'-'}<br>`;
+html+=`<div class="ogr-kart">${d}: ${n.y1||'-'} | ${n.y2||'-'} | ${n.y3||'-'} | ${n.y4||'-'}</div>`;
 });
-document.getElementById('mevcutNotlar').innerHTML=html;
+document.getElementById('mevcutNotlar').innerHTML=html||'Not yok';
 dersSel.onchange=dersSec;
 }
 
@@ -226,16 +243,15 @@ ogrenciler[idx].notlar[y2]=document.getElementById('not2').value;
 ogrenciler[idx].notlar[y3]=document.getElementById('not3').value;
 ogrenciler[idx].notlar[y4]=document.getElementById('not4').value;
 ogrencileriKaydet(ogrenciler);
-alert('Kaydedildi!');
+alert(ad+' - '+ders+' notları kaydedildi!');
 ogrenciSec();
 }
 
-// DUYURU
 function duyuruGonder(){
 let sinif=document.getElementById('duyuruSinif').value;
 let baslik=document.getElementById('duyuruBaslik').value;
 let metin=document.getElementById('duyuruMetin').value;
-if(!baslik||!metin){alert('Doldurun');return;}
+if(!baslik||!metin){alert('Başlık ve metin doldurun');return;}
 let duyurular=JSON.parse(localStorage.getItem('duyurular')||'[]');
 duyurular.push({sinif,baslik,metin,tarih:new Date().toLocaleDateString('tr-TR')});
 localStorage.setItem('duyurular',JSON.stringify(duyurular));
