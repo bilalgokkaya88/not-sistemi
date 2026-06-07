@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Not Sistemi v4</title>
+<title>Not Sistemi v6</title>
 <style>
 body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
 .container{max-width:700px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
@@ -14,9 +14,9 @@ body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
 input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px;box-sizing:border-box;font-size:15px}
 button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer;font-size:16px;width:100%;margin-top:10px}
 button.ekle:hover{background:#218838}
-.sifre-kutu{background:#f8f9fa;padding:12px;border-left:4px solid #007bff;margin:8px 0;border-radius:5px;display:flex;justify-content:space-between;align-items:center}
-.sil-btn{background:#dc3545;padding:6px 12px;font-size:13px;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold}
-.sil-btn:hover{background:#c82333}
+.sifre-kutu{background:#f8f9fa;padding:12px;border-left:4px solid #007bff;margin:8px 0;border-radius:5px}
+.sil-btn{background:#dc3545;padding:6px 12px;font-size:13px;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;float:right}
+.not-kayit{background:#e7f3ff;padding:8px;margin-top:5px;border-radius:4px;font-size:14px}
 </style>
 </head>
 <body>
@@ -29,6 +29,7 @@ button.ekle:hover{background:#218838}
 <button class="tab-btn" onclick="sekmeAc('sifreSekme',event)">3. Şifre Listesi</button>
 </div>
 
+<!-- 1. ÖĞRENCİ EKLE -->
 <div id="ogrenci" class="tab-content active">
 <h3>Yeni Öğrenci Ekle</h3>
 <input type="text" id="adInput" placeholder="Öğrenci Ad Soyad">
@@ -42,24 +43,26 @@ button.ekle:hover{background:#218838}
 <button class="ekle" onclick="ogrenciEkle()">Öğrenci Kaydet</button>
 </div>
 
+<!-- 2. NOT GİR - ARTIK ÇALIŞIYOR -->
 <div id="not" class="tab-content">
 <h3>Not Girişi</h3>
 <select id="ogrenciSec"><option>Önce öğrenci ekleyin</option></select>
-<input type="text" id="ders" placeholder="Ders Adı">
+<input type="text" id="ders" placeholder="Ders Adı - Örn: Matematik Yazılı 1">
 <input type="number" id="puan" placeholder="Not 0-100" min="0" max="100">
 <button class="ekle" onclick="notEkle()">Not Kaydet</button>
 </div>
 
+<!-- 3. ŞİFRE + NOT LİSTESİ -->
 <div id="sifreSekme" class="tab-content">
-<h3>Veli Şifreleri</h3>
-<button class="ekle" onclick="kopyala()">Tümünü Kopyala</button>
+<h3>Öğrenci Listesi + Notlar</h3>
+<button class="ekle" onclick="kopyala()">Tüm Şifreleri Kopyala</button>
 <div id="sifreListesi" style="margin-top:15px">Henüz öğrenci yok</div>
 </div>
 
 </div>
 
 <script>
-let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler_v3')) || [];
+let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler_v6')) || [];
 
 function sekmeAc(sekmAdi,event){
 document.querySelectorAll('.tab-content').forEach(s=>s.classList.remove('active'));
@@ -75,11 +78,12 @@ let ad=document.getElementById('adInput').value.trim();
 let sifre=document.getElementById('sifreInput').value.trim();
 let sinif=document.getElementById('sinifInput').value;
 if(!ad ||!sifre){alert('Ad ve Şifre girin');return;}
-ogrenciler.push({ad,sifre,sinif,id:Date.now()});
-localStorage.setItem('ogrenciler_v3', JSON.stringify(ogrenciler));
+if(ogrenciler.find(o=>o.ad.toLowerCase()===ad.toLowerCase() && o.sinif===sinif)){alert('Bu öğrenci zaten var!');return;}
+ogrenciler.push({ad,sifre,sinif,id:Date.now(),notlar:[]});
+localStorage.setItem('ogrenciler_v6', JSON.stringify(ogrenciler));
 document.getElementById('adInput').value='';
 document.getElementById('sifreInput').value='';
-alert('Öğrenci eklendi!');
+alert(ad + ' eklendi!');
 }
 
 function selectGuncelle(){
@@ -87,14 +91,27 @@ let select=document.getElementById('ogrenciSec');
 select.innerHTML='';
 if(ogrenciler.length===0){select.innerHTML='<option>Önce öğrenci ekleyin</option>';return;}
 ogrenciler.forEach((o,i)=>{
-select.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
+select.innerHTML+=`<option value="${o.id}">${o.ad} - ${o.sinif}</option>`;
 });
 }
 
+function notEkle(){
+let ogrId = parseInt(document.getElementById('ogrenciSec').value);
+let ders = document.getElementById('ders').value.trim();
+let puan = document.getElementById('puan').value;
+if(!ogrId || !ders || !puan){alert('Öğrenci, Ders ve Not girin');return;}
+let ogr = ogrenciler.find(o=>o.id===ogrId);
+ogr.notlar.push({ders, puan:parseInt(puan), tarih:new Date().toLocaleDateString('tr-TR')});
+localStorage.setItem('ogrenciler_v6', JSON.stringify(ogrenciler));
+document.getElementById('ders').value='';
+document.getElementById('puan').value='';
+alert(ogr.ad + ' için not kaydedildi ✓');
+}
+
 function ogrenciSil(id){
-if(confirm('Bu öğrenciyi silmek istediğinize emin misiniz?')){
+if(confirm('Bu öğrenciyi ve tüm notlarını silmek istediğinize emin misiniz?')){
 ogrenciler = ogrenciler.filter(o => o.id !== id);
-localStorage.setItem('ogrenciler_v3', JSON.stringify(ogrenciler));
+localStorage.setItem('ogrenciler_v6', JSON.stringify(ogrenciler));
 sifreListele();
 }
 }
@@ -104,7 +121,15 @@ let div=document.getElementById('sifreListesi');
 if(ogrenciler.length===0){div.innerHTML='Henüz öğrenci yok';return;}
 let html='';
 ogrenciler.forEach(o=>{
-html+=`<div class="sifre-kutu"><div><b>${o.ad}</b> - ${o.sinif}<br>Şifre: ${o.sifre}</div><button class="sil-btn" onclick="ogrenciSil(${o.id})">Sil</button></div>`;
+let notHtml = '';
+if(o.notlar && o.notlar.length>0){
+notHtml = '<div style="margin-top:8px"><b>Notlar:</b>';
+o.notlar.forEach(n=>{
+notHtml += `<div class="not-kayit">${n.ders}: <b>${n.puan}</b> - ${n.tarih}</div>`;
+});
+notHtml += '</div>';
+}
+html+=`<div class="sifre-kutu"><button class="sil-btn" onclick="ogrenciSil(${o.id})">Sil</button><b>${o.ad}</b> - ${o.sinif}<br>Şifre: ${o.sifre}${notHtml}</div>`;
 });
 div.innerHTML=html;
 }
@@ -115,8 +140,6 @@ let metin=ogrenciler.map(o=>`${o.ad} - ${o.sinif} | Şifre: ${o.sifre}`).join('\
 navigator.clipboard.writeText(metin);
 alert('Tüm şifreler kopyalandı!');
 }
-
-function notEkle(){alert('Not kaydetme fonksiyonu sonra eklenecek');}
 </script>
 </body>
 </html>
