@@ -1,16 +1,97 @@
-Düzenleme
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Veli Giriş - Not Takip</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:'Segoe UI',Arial;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);margin:0;padding:20px;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.kutu{background:white;padding:30px;border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-width:500px;width:100%}
+h2{color:#667eea;text-align:center;margin-top:0}
+input{width:100%;padding:12px;margin:10px 0;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:16px}
+input:focus{border-color:#667eea;outline:none}
+button{background:#667eea;color:white;border:none;padding:14px;width:100%;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+button:hover{background:#5568d3}
+#sonuc{margin-top:20px;display:none}
+.not-kart{background:#f8f9fa;border-left:4px solid #28a745;padding:12px;margin:8px 0;border-radius:6px}
+.hata{color:#dc3545;background:#f8d7da;padding:12px;border-radius:8px;margin-top:10px;text-align:center}
+.bilgi{background:#d1ecf1;color:#0c5460;padding:12px;border-radius:8px;margin-bottom:15px;font-size:14px}
+.ogrenci-bilgi{text-align:center;background:#667eea;color:white;padding:15px;border-radius:8px;margin-bottom:15px}
+</style>
+</head>
+<body>
+<div class="kutu">
+<h2>📊 Veli Not Takip Sistemi</h2>
+<div class="bilgi">Çocuğunuzun notlarını görmek için Ad Soyad ve öğretmenin verdiği şifreyi girin.</div>
 
-Önizleme
-Girinti modu
+<div id="giris">
+<input type="text" id="ad" placeholder="Öğrenci Ad Soyad" autocomplete="off">
+<input type="password" id="sifre" placeholder="Veli Şifresi">
+<button onclick="girisYap()">Notları Görüntüle</button>
+<div id="hata"></div>
+</div>
 
-Uzaylar
-Girinti boyutu
+<div id="sonuc">
+<div class="ogrenci-bilgi" id="ogrenciBilgi"></div>
+<div id="notlar"></div>
+<button onclick="cikisYap()" style="background:#6c757d">Çıkış Yap</button>
+</div>
+</div>
 
-2
-Satır sarma modu
+<script>
+function girisYap(){
+let ad = document.getElementById('ad').value.trim();
+let sifre = document.getElementById('sifre').value.trim();
+document.getElementById('hata').innerHTML = '';
 
-Sarılma yok
-Dosya içeriği veli.html düzenleme
-Selection deleted
-  1
-  2
+if(!ad ||!sifre){
+document.getElementById('hata').innerHTML = '<div class="hata">Ad Soyad ve Şifre girin!</div>';
+return;
+}
+
+// Admin panelinden kayıtlı öğrencileri çek
+let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler_v6')) || [];
+
+let ogrenci = ogrenciler.find(o =>
+o.ad.toLowerCase() === ad.toLowerCase() && o.sifre === sifre
+);
+
+if(!ogrenci){
+document.getElementById('hata').innerHTML = '<div class="hata">Bilgiler hatalı! Lütfen kontrol edin.</div>';
+return;
+}
+
+// Başarılı giriş
+document.getElementById('giris').style.display = 'none';
+document.getElementById('sonuc').style.display = 'block';
+
+document.getElementById('ogrenciBilgi').innerHTML = `<b>${ogrenci.ad}</b><br>${ogrenci.sinif}`;
+
+let notDiv = document.getElementById('notlar');
+if(!ogrenci.notlar || ogrenci.notlar.length === 0){
+notDiv.innerHTML = '<div style="text-align:center;color:#666">Henüz not girilmemiş</div>';
+return;
+}
+
+let html = '<h3 style="color:#667eea">Notlar</h3>';
+ogrenci.notlar.forEach(n => {
+html += `<div class="not-kart"><b>${n.ders}</b><br>Not: <b style="font-size:20px;color:#28a745">${n.puan}</b> / 100<br><small style="color:#666">${n.tarih}</small></div>`;
+});
+notDiv.innerHTML = html;
+}
+
+function cikisYap(){
+document.getElementById('giris').style.display = 'block';
+document.getElementById('sonuc').style.display = 'none';
+document.getElementById('ad').value = '';
+document.getElementById('sifre').value = '';
+document.getElementById('hata').innerHTML = '';
+}
+
+// Enter ile giriş
+document.getElementById('sifre').addEventListener('keypress', function(e){
+if(e.key === 'Enter') girisYap();
+});
+</script>
+</body>
+</html>
