@@ -1,84 +1,50 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel - Öğretmen</title>
+<title>Admin Panel</title>
 <style>
-body{font-family:Arial;background:#eef2f7;padding:20px;margin:0}
-.box{background:white;padding:30px;border-radius:12px;max-width:800px;margin:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-h2{text-align:center;color:#2196F3;margin-bottom:25px}
-.tabs{display:flex;margin-bottom:25px;gap:5px}
-.tab{flex:1;padding:14px;cursor:pointer;border:none;background:#e0e0e0;border-radius:8px;font-size:16px;font-weight:bold}
-.tab.active{background:#2196F3;color:white}
-input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box}
-button{background:#2196F3;color:white;border:none;cursor:pointer;font-weight:bold}
-button:hover{background:#1976D2}
-.sekme{display:none}
-.sekme.aktif{display:block}
-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px}
-th,td{border:1px solid #ddd;padding:10px;text-align:center}
-th{background:#2196F3;color:white}
-tr:nth-child(even){background:#f5f5f5}
-.mesaj{padding:12px;border-radius:6px;margin-top:10px;text-align:center;font-weight:bold}
-.basarili{background:#d4edda;color:#155724}
-.bilgi{background:#cce5ff;color:#004085}
+body{font-family:Arial;padding:20px;background:#f5f5f5}
+.container{max-width:800px;margin:auto;background:white;padding:20px;border-radius:8px}
+button{padding:10px 20px;margin:5px;cursor:pointer}
+input{padding:8px;margin:5px}
+.tab{display:none}
+.tab.active{display:block}
 </style>
 </head>
 <body>
-<div class="box">
-<h2>Admin Panel - Öğretmen Ekranı</h2>
-<div class="tabs">
-<button class="tab aktif" onclick="sekme(1)">1. Notları Görüntüle</button>
-<button class="tab" onclick="sekme(2)">2. Veli Şifresi Oluştur</button>
+<div class="container">
+<h2>Admin Panel</h2>
+<button onclick="sekme('ogrenci')">Öğrenci Ekle</button>
+<button onclick="sekme('not')">Not Gir</button>
+
+<div id="ogrenci" class="tab active">
+<h3>Öğrenci Ekle</h3>
+<input id="tc" placeholder="TC Kimlik">
+<input id="ad" placeholder="Ad Soyad">
+<button onclick="ekle()">Ekle</button>
 </div>
 
-<div id="sekme1" class="sekme aktif">
-<h3>Tüm Öğrenci Ders Notları</h3>
-<button onclick="listele()">Yenile / Listele</button>
-<div id="liste"><p style="text-align:center;color:#666">Listele butonuna bas</p></div>
-</div>
-
-<div id="sekme2" class="sekme">
-<h3>Veli Yetkilendirme Paneli</h3>
-<p style="color:#666;font-size:14px">Veli TC ve şifre oluştur. Veli bu bilgilerle not girecek.</p>
-<input type="text" id="ogrNo" placeholder="Öğrenci No - Örn: 101">
-<input type="text" id="ogrAd" placeholder="Öğrenci Ad Soyad - Örn: Ali Yılmaz">
-<input type="text" id="tc" placeholder="Veli TC Kimlik No - 11 hane">
-<input type="password" id="sifre" placeholder="Veli Şifresi - Örn: ali123">
-<button onclick="veliEkle()">Şifre Oluştur ve Kaydet</button>
-<div id="sonuc2"></div>
+<div id="not" class="tab">
+<h3>Not Gir</h3>
+<button onclick="listele()">Listele</button>
+<div id="liste"></div>
 </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwh3gRjMlIYTwGacxJnWLrK0mVouKAdyu8eAdO3bIFycVZNjjJLlU2H3Iknpp_zw1hc/exec";
-
-function sekme(n){
-document.querySelectorAll('.sekme').forEach(s=>s.classList.remove('aktif'));
-document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktif'));
-document.getElementById('sekme'+n).classList.add('aktif');
-document.querySelectorAll('.tab')[n-1].classList.add('aktif');
+function sekme(id){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.getElementById(id).classList.add('active');
 }
-
+function ekle(){
+let tc=document.getElementById('tc').value;
+let ad=document.getElementById('ad').value;
+alert(tc+' - '+ad+' eklendi');
+}
 function listele(){
-liste.innerHTML = "<p style='text-align:center'>Yükleniyor...</p>";
-fetch(API_URL).then(r=>r.json()).then(data=>{
-if(data.length==0){liste.innerHTML="<p>Hiç kayıt yok</p>";return;}
-let html = "<table><tr><th>No</th><th>Ad Soyad</th><th>1.Not</th><th>2.Not</th><th>3.Not</th><th>4.Not</th></tr>";
-data.forEach(row=>{
-html += `<tr><td>${row[0]||'-'}</td><td>${row[1]||'-'}</td><td>${row[2]||'-'}</td><td>${row[3]||'-'}</td><td>${row[4]||'-'}</td><td>${row[5]||'-'}</td></tr>`;
-});
-html += "</table><div class='mesaj bilgi'>Toplam "+data.length+" öğrenci</div>";
-liste.innerHTML = html;
-}).catch(err=>{liste.innerHTML="<div class='mesaj basarili'>Hata: "+err+"</div>"});
-}
-
-function veliEkle(){
-if(!ogrNo.value || !tc.value || !sifre.value){
-sonuc2.innerHTML = "<div class='mesaj basarili'>Lütfen tüm alanları doldur</div>";return;
-}
-sonuc2.innerHTML = "<div class='mesaj basarili'>✅ Veli yetkisi oluşturuldu!<br>Öğrenci: "+ogrAd.value+"<br>No: "+ogrNo.value+"<br>TC: "+tc.value+"<br>Şifre: "+sifre.value+"<br><br>Bu bilgileri veliye gönder.</div>";
-document.querySelectorAll('#sekme2 input').forEach(i=>i.value='');
+document.getElementById('liste').innerHTML='Öğrenci listesi buraya gelecek';
 }
 </script>
 </body>
