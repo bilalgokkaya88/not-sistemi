@@ -2,84 +2,186 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Veli Paneli v40</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veli Paneli</title>
 <style>
-body{margin:0;font-family:Arial;background:#667eea;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:15px}
-.kutu{background:white;padding:25px;border-radius:15px;width:100%;max-width:450px}
-h2{text-align:center;color:#667eea;margin:0 0 20px 0}
-input{width:100%;padding:14px;margin:10px 0;border:2px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}
-button{width:100%;padding:15px;background:#4caf50;color:white;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer}
-.not-kart{background:#f8f9ff;border:2px solid #667eea;padding:12px;margin:10px 0;border-radius:10px}
-.hata{color:red;text-align:center;margin-top:10px;font-weight:bold}
+body{font-family:Arial;padding:20px;background:#f5f5f5}
+.kutu{background:white;padding:20px;border-radius:10px;max-width:500px;margin:auto;box-shadow:0 2px 5px #ccc}
+input,button,select{padding:10px;margin:5px 0;width:100%;box-sizing:border-box;font-size:16px;border:1px solid #ddd;border-radius:5px}
+button{background:#4CAF50;color:white;border:none;cursor:pointer;font-weight:bold}
+button:hover{background:#45a049}
+hr{margin:25px 0;border:0;border-top:1px solid #ddd}
+#sonuc{margin-top:10px;font-weight:bold;text-align:center}
+.ortalama{background:#e8f5e9;padding:15px;border-radius:5px;margin-top:10px;font-weight:bold;color:#2e7d32;font-size:18px;text-align:center}
+h2,h3{color:#333;margin-top:0}
+label{font-weight:bold;margin-top:10px;display:block;color:#555}
 </style>
 </head>
 <body>
-<div class="kutu" id="giris">
-<h2>📱 Veli Girişi v40</h2>
-<input id="tel" type="tel" placeholder="Telefon 05354611015" inputmode="numeric">
-<input id="sifre" type="password" placeholder="Şifre">
-<button onclick="giris()">Giriş Yap</button>
-<div id="hata" class="hata"></div>
-</div>
 
-<div class="kutu" id="panel" style="display:none">
-<h2><span id="ogrAd"></span></h2>
-<p><b>Sınıf:</b> <span id="ogrSinif"></span></p>
-<div id="duyuru"></div>
-<h3>📊 Notlar</h3>
-<div id="notlar"></div>
-<button onclick="cikis()" style="background:#f44336;margin-top:15px">Çıkış</button>
+<div class="kutu">
+  <h2>Veli Paneli</h2>
+  
+  <div id="giris">
+    <h3>Giriş Yap</h3>
+    <input type="text" id="tel" placeholder="Veli Telefon No">
+    <input type="password" id="sifre" placeholder="Şifre">
+    <button onclick="girisYap()">Giriş</button>
+  </div>
+
+  <div id="bilgi" style="display:none">
+    <h3>Öğrenci Bilgisi</h3>
+    <p><b>Ad Soyad:</b> <span id="ad"></span></p>
+    <p><b>Sınıf:</b> <span id="sinif"></span></p>
+    <button onclick="cikis()" style="background:#f44336">Çıkış Yap</button>
+
+    <hr>
+    <h3>Not Girişi</h3>
+    <label>Ders Seç</label>
+    <select id="ders" onchange="notKutulariniTemizle()">
+      <option value="">Ders Seçiniz</option>
+    </select>
+    
+    <label>1. Yazılı</label>
+    <input type="number" id="not1" placeholder="0-100 arası" min="0" max="100" oninput="ortalamaHesapla()">
+    
+    <label>2. Yazılı</label>
+    <input type="number" id="not2" placeholder="0-100 arası" min="0" max="100" oninput="ortalamaHesapla()">
+    
+    <label>3. Yazılı</label>
+    <input type="number" id="not3" placeholder="0-100 arası" min="0" max="100" oninput="ortalamaHesapla()">
+    
+    <label>4. Yazılı</label>
+    <input type="number" id="not4" placeholder="0-100 arası" min="0" max="100" oninput="ortalamaHesapla()">
+    
+    <div id="ortalamaKutu" class="ortalama" style="display:none">
+      Dönem Ortalaması: <span id="ort">0</span>
+    </div>
+    
+    <button onclick="notGonder()">Notları Gönder</button>
+    <p id="sonuc"></p>
+  </div>
 </div>
 
 <script>
-let ogrenciler=[];
-let duyurular=[];
+let ogrenciler = [];
+let dersler = [];
 
-fetch('ogrenciler.json?v='+Date.now()).then(r=>r.json()).then(d=>ogrenciler=d).catch(()=>{});
-fetch('duyurular.json?v='+Date.now()).then(r=>r.json()).then(d=>duyurular=d).catch(()=>{});
+fetch('ogrenciler.json').then(r => r.json()).then(data => { ogrenciler = data; });
+fetch('dersler.json').then(r => r.json()).then(data => { dersler = data; });
 
-function giris(){
-let tel=document.getElementById('tel').value.replace(/\s/g,'');
-if(tel.length==10 && tel[0]!='0') tel = '0' + tel;
-let sifre=document.getElementById('sifre').value.trim();
-
-let o=ogrenciler.find(x=>x.tel==tel && x.sifre==sifre);
-if(o){
-document.getElementById('giris').style.display='none';
-document.getElementById('panel').style.display='block';
-document.getElementById('ogrAd').innerText=o.ad;
-document.getElementById('ogrSinif').innerText=o.sinif;
-notGoster(o);
-duyGoster(o.sinif);
-}else{
-document.getElementById('hata').innerText='Telefon veya şifre hatalı!';
-}
-}
-
-function notGoster(o){
-let h='';
-for(let d in o.notlar){
-let n=o.notlar[d];
-let arr=[n.y1,n.y2,n.y3,n.y4].filter(x=>x!='').map(Number);
-let ort=arr.length?(arr.reduce((a,b)=>a+b)/arr.length).toFixed(1):'-';
-h+=`<div class="not-kart"><b>${d}</b><br>1:${n.y1||'-'} 2:${n.y2||'-'} 3:${n.y3||'-'} 4:${n.y4||'-'}<br><b>Ortalama: ${ort}</b></div>`;
-}
-document.getElementById('notlar').innerHTML=h||'Henüz not girilmemiş';
+function girisYap() {
+  const tel = document.getElementById('tel').value.trim();
+  const sifre = document.getElementById('sifre').value.trim();
+  
+  const ogr = ogrenciler.find(o => o.tel == tel && o.sifre == sifre);
+  
+  if(ogr) {
+    localStorage.setItem('ogrenciNo', ogr.no);
+    localStorage.setItem('ogrenciAd', ogr.ad);
+    localStorage.setItem('ogrenciSinif', ogr.sinif);
+    
+    document.getElementById('giris').style.display = 'none';
+    document.getElementById('bilgi').style.display = 'block';
+    document.getElementById('ad').innerText = ogr.ad;
+    document.getElementById('sinif').innerText = ogr.sinif;
+    
+    dersleriYukle(ogr.sinif);
+  } else {
+    alert('Telefon veya şifre hatalı!');
+  }
 }
 
-function duyGoster(sinif){
-let son=duyurular.filter(x=>x.sinif==sinif).pop();
-if(son)document.getElementById('duyuru').innerHTML=`<div style="background:#fff3e0;border-left:4px solid #ff9800;padding:10px;margin:10px 0;border-radius:6px"><b>📢 ${son.baslik}</b><br>${son.metin}<br><small>${son.tarih}</small></div>`;
+function dersleriYukle(sinif) {
+  const sinifDersleri = dersler.find(d => d.sinif == sinif);
+  const select = document.getElementById('ders');
+  select.innerHTML = '<option value="">Ders Seçiniz</option>';
+  
+  if(sinifDersleri && sinifDersleri.dersler) {
+    sinifDersleri.dersler.forEach(ders => {
+      select.innerHTML += `<option value="${ders}">${ders}</option>`;
+    });
+  } else {
+    select.innerHTML += `<option value="">Bu sınıfa ders atanmamış</option>`;
+  }
 }
 
-function cikis(){
-document.getElementById('panel').style.display='none';
-document.getElementById('giris').style.display='block';
-document.getElementById('tel').value='';
-document.getElementById('sifre').value='';
-document.getElementById('hata').innerText='';
+function notKutulariniTemizle() {
+  document.getElementById('not1').value = "";
+  document.getElementById('not2').value = "";
+  document.getElementById('not3').value = "";
+  document.getElementById('not4').value = "";
+  document.getElementById('ortalamaKutu').style.display = 'none';
+}
+
+function ortalamaHesapla() {
+  const n1 = parseFloat(document.getElementById('not1').value) || 0;
+  const n2 = parseFloat(document.getElementById('not2').value) || 0;
+  const n3 = parseFloat(document.getElementById('not3').value) || 0;
+  const n4 = parseFloat(document.getElementById('not4').value) || 0;
+  
+  if(n1 > 0 && n2 > 0 && n3 > 0 && n4 > 0) {
+    const ort = ((n1 + n2 + n3 + n4) / 4).toFixed(2);
+    document.getElementById('ort').innerText = ort;
+    document.getElementById('ortalamaKutu').style.display = 'block';
+  } else {
+    document.getElementById('ortalamaKutu').style.display = 'none';
+  }
+}
+
+function cikis() {
+  localStorage.clear();
+  location.reload();
+}
+
+function notGonder() {
+  const ders = document.getElementById('ders').value;
+  const n1 = document.getElementById('not1').value;
+  const n2 = document.getElementById('not2').value;
+  const n3 = document.getElementById('not3').value;
+  const n4 = document.getElementById('not4').value;
+  
+  if(!ders) {
+    alert('Lütfen ders seçiniz!');
+    return;
+  }
+  if(!n1 || !n2 || !n3 || !n4) {
+    alert('4 yazılı notunu da giriniz!');
+    return;
+  }
+  
+  const ort = ((parseFloat(n1) + parseFloat(n2) + parseFloat(n3) + parseFloat(n4)) / 4).toFixed(2);
+  const ogrenciNo = localStorage.getItem('ogrenciNo');
+  const ogrenciAd = localStorage.getItem('ogrenciAd');
+  
+  const data = {
+    no: ogrenciNo,
+    ad: ogrenciAd,
+    ders: ders,
+    not1: n1,
+    not2: n2,
+    not3: n3,
+    not4: n4,
+    ortalama: ort,
+    tarih: new Date().toLocaleString('tr-TR')
+  };
+  
+  document.getElementById('sonuc').innerHTML = "Gönderiliyor...";
+  
+  fetch("https://script.google.com/macros/s/AKfycbzkSOqC8Z9FiMPjdHjMMK0zMAiyY05RwcAyMcm_UZkTz2f5NKT-rABHcpSBv3GO3lG5/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(r => r.text())
+  .then(sonuc => {
+    document.getElementById('sonuc').innerHTML = "✅ Başarılı! Ortalama: " + ort + " Google Sheet'e kaydedildi.";
+    setTimeout(notKutulariniTemizle, 2000);
+  })
+  .catch(err => {
+    document.getElementById('sonuc').innerHTML = "❌ Hata oluştu: " + err;
+  });
 }
 </script>
+
 </body>
 </html>
