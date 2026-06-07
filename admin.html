@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Not Sistemi</title>
+<title>Not Sistemi v3</title>
 <style>
 body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
 .container{max-width:700px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
@@ -24,15 +24,15 @@ button.ekle:hover{background:#218838}
 <div class="tab-buttons">
 <button class="tab-btn active" onclick="sekmeAc('ogrenci',event)">1. Öğrenci Ekle</button>
 <button class="tab-btn" onclick="sekmeAc('not',event)">2. Not Gir</button>
-<button class="tab-btn" onclick="sekmeAc('sifre',event)">3. Şifre Listesi</button>
+<button class="tab-btn" onclick="sekmeAc('sifreSekme',event)">3. Şifre Listesi</button>
 </div>
 
 <!-- 1. ÖĞRENCİ EKLE -->
 <div id="ogrenci" class="tab-content active">
 <h3>Yeni Öğrenci Ekle</h3>
-<input type="text" id="ad" placeholder="Öğrenci Ad Soyad">
-<input type="password" id="sifre" placeholder="Veli Şifresi Belirle">
-<select id="sinif">
+<input type="text" id="adInput" placeholder="Öğrenci Ad Soyad">
+<input type="password" id="sifreInput" placeholder="Veli Şifresi Belirle">
+<select id="sinifInput">
 <option>5. Sınıf</option>
 <option>6. Sınıf</option>
 <option>7. Sınıf</option>
@@ -51,7 +51,7 @@ button.ekle:hover{background:#218838}
 </div>
 
 <!-- 3. ŞİFRE LİSTESİ -->
-<div id="sifre" class="tab-content">
+<div id="sifreSekme" class="tab-content">
 <h3>Veli Şifreleri</h3>
 <button class="ekle" onclick="kopyala()">Tümünü Kopyala</button>
 <div id="sifreListesi" style="margin-top:15px">Henüz öğrenci yok</div>
@@ -67,19 +67,19 @@ document.querySelectorAll('.tab-content').forEach(s=>s.classList.remove('active'
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 document.getElementById(sekmAdi).classList.add('active');
 event.target.classList.add('active');
-if(sekmAdi==='sifre') sifreListele();
+if(sekmAdi==='sifreSekme') sifreListele();
 if(sekmAdi==='not') selectGuncelle();
 }
 
 function ogrenciEkle(){
-let ad=document.getElementById('ad').value.trim();
-let sifre=document.getElementById('sifre').value.trim();
-let sinif=document.getElementById('sinif').value;
+let ad=document.getElementById('adInput').value.trim();
+let sifre=document.getElementById('sifreInput').value.trim();
+let sinif=document.getElementById('sinifInput').value;
 if(!ad ||!sifre){alert('Ad ve Şifre girin');return;}
 ogrenciler.push({ad,sifre,sinif});
 localStorage.setItem('ogrenciler', JSON.stringify(ogrenciler));
-document.getElementById('ad').value='';
-document.getElementById('sifre').value='';
+document.getElementById('adInput').value='';
+document.getElementById('sifreInput').value='';
 alert('Öğrenci eklendi!');
 }
 
