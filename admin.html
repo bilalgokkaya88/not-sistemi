@@ -3,227 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;background:#f0f2f5;font-family:Arial;padding:20px}
-.kutu{background:white;padding:20px;border-radius:12px;max-width:800px;margin:auto}
-.sekme{padding:10px 20px;margin:5px;background:#ddd;border:none;border-radius:8px;cursor:pointer}
-.sekme.aktif{background:#667eea;color:white}
-.tab-icerik{display:none;margin-top:20px}
-.tab-icerik.aktif{display:block}
-input,select{width:100%;padding:10px;margin:5px 0;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:16px}
-button{padding:10px 20px;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;margin:5px 0}
-.ogr-kart{border:1px solid #ddd;padding:10px;margin:5px 0;border-radius:8px}
-.btn-kucuk{padding:5px 10px;font-size:12px;margin:2px}
+body{font-family:Arial;background:#667eea;padding:20px}
+.kutu{background:white;padding:25px;border-radius:15px;max-width:900px;margin:auto}
+input,select,textarea{padding:10px;margin:5px;border:2px solid #ddd;border-radius:8px}
+button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radius:8px;cursor:pointer;margin:5px}
+.tab-btn{background:#999;margin:5px 2px}
+.tab-btn.aktif{background:#4caf50}
+.tab-content{display:none;margin-top:20px}
+.tab-content.aktif{display:block}
+.ogr-kart{border:1px solid #ddd;padding:10px;margin:5px 0;border-radius:8px;background:#f9f9f9}
+.btn-kucuk{padding:5px 10px;font-size:12px;width:auto}
 .btn-sil{background:#f44336}
-.btn-gor{background:#2196f3}
-optgroup{font-weight:bold}
-.ders-item{background:#f8f9ff;padding:8px;margin:5px 0;border-radius:6px;display:flex;justify-content:space-between}
+.btn-gor{background:#2196F3}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>⚙️ Admin Panel</h2>
-<button class="sekme aktif" onclick="sekmeAc(1)">1. Öğrenci Ekle</button>
-<button class="sekme" onclick="sekmeAc(2)">2. Ders Yönet</button>
-<button class="sekme" onclick="sekmeAc(3)">3. Not Gir</button>
-<button class="sekme" onclick="sekmeAc(4)">4. Liste + İndir</button>
+<h2>👨‍🏫 Admin Panel</h2>
 
-<div id="tab1" class="tab-icerik aktif">
+<button class="tab-btn aktif" onclick="sekmeAc('ekle',this)">➕ Öğrenci Ekle</button>
+<button class="tab-btn" onclick="sekmeAc('ders',this)">📚 Ders Ekle</button>
+<button class="tab-btn" onclick="sekmeAc('liste',this)">👥 Öğrenci Listesi</button>
+<button class="tab-btn" onclick="sekmeAc('not',this)">📝 Toplu Not Girişi</button>
+<button class="tab-btn" onclick="sekmeAc('duyuru',this)">📢 Duyuru</button>
+
+<!-- 1. SEKME -->
+<div id="ekle" class="tab-content aktif">
 <h3>Öğrenci Ekle</h3>
-<input type="text" id="yeniAd" placeholder="Ad Soyad">
-<select id="yeniSinif">
-<optgroup label="İLKOKUL / ORTAOKUL">
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option>
-<option>7. Sınıf</option><option>8. Sınıf</option>
-</optgroup>
-<optgroup label="LİSE">
-<option>9. Sınıf</option><option>10. Sınıf</option>
+<select id="sinif">
+<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
+<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
 <option>11. Sınıf</option><option>12. Sınıf</option>
-</optgroup>
 </select>
-<input type="password" id="yeniSifre" placeholder="Şifre">
-<button onclick="ogrenciEkle()">Öğrenci Ekle</button>
+<input type="text" id="ad" placeholder="Ad Soyad">
+<input type="password" id="sifre" placeholder="Şifre">
+<button onclick="ogrenciEkle()">Ekle</button>
 </div>
 
-<div id="tab2" class="tab-icerik">
-<h3>Ders Yönet - Sınıf Bazlı</h3>
-<h4>1. Sınıf Seç</h4>
-<select id="dersSinifSec" onchange="dersleriListeleAdmin()">
-<optgroup label="İLKOKUL / ORTAOKUL">
-<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option>
-<option>7. Sınıf</option><option>8. Sınıf</option>
-</optgroup>
-<optgroup label="LİSE">
-<option>9. Sınıf</option><option>10. Sınıf</option>
+<!-- 2. SEKME -->
+<div id="ders" class="tab-content">
+<h3>Sınıfa Ders Ekle</h3>
+<select id="dersSinif">
+<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
+<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
 <option>11. Sınıf</option><option>12. Sınıf</option>
-</optgroup>
 </select>
-<h4>2. Ders Ekle</h4>
-<input type="text" id="yeniDersAdmin" placeholder="Ders adı - Örn: Matematik">
-<button onclick="dersEkleAdmin()">Dersi Ekle</button>
+<input type="text" id="dersAdi" placeholder="Ders Adı">
+<button onclick="dersEkle()">Ders Ekle</button>
 <div id="dersListesi" style="margin-top:15px"></div>
 </div>
 
-<div id="tab3" class="tab-icerik">
-<h3>Not Gir</h3>
-<select id="ogrSec"></select>
-<input type="text" id="dersSec" placeholder="Ders adı">
-<input type="number" id="puan" placeholder="1. Yazılı 0-100">
-<button onclick="notKaydet()">Kaydet</button>
-</div>
-
-<div id="tab4" class="tab-icerik">
+<!-- 3. SEKME -->
+<div id="liste" class="tab-content">
 <h3>Öğrenci Listesi</h3>
-<button onclick="secTum()">Tümünü Seç</button>
-<button onclick="topluSil()">Seçileni Sil</button>
-<button onclick="pdfIndir()">PDF İndir</button>
-<button onclick="excelIndir()" style="background:#1e7e34">Excel İndir</button>
+<button onclick="listeleOgrenciler()">Yenile</button>
 <div id="ogrListesi"></div>
 </div>
+
+<!-- 4. SEKME: TOPLU NOT GİRİŞİ -->
+<div id="not" class="tab-content">
+<h3>📝 Toplu Not Girişi - Eksik Tamamlama</h3>
+<select id="notSinif" onchange="sinifOgrencileriYukle()">
+<option>Sınıf seç...</option>
+<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
+<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
+<option>11. Sınıf</option><option>12. Sınıf</option>
+</select>
+<select id="notOgrenci" disabled>
+<option>Önce sınıf seç...</option>
+</select>
+<div id="notGirisAlani" style="display:none;margin-top:15px">
+<select id="notDers"><option>Ders seç...</option></select>
+<input type="number" id="not1" placeholder="1.Yazılı" min="0" max="100" style="width:80px">
+<input type="number" id="not2" placeholder="2.Yazılı" min="0" max="100" style="width:80px">
+<input type="number" id="not3" placeholder="3.Yazılı" min="0" max="100" style="width:80px">
+<input type="number" id="not4" placeholder="4.Yazılı" min="0" max="100" style="width:80px">
+<button onclick="notKaydetAdmin()" style="background:#2196F3">Kaydet</button>
+</div>
+<div id="mevcutNotlar" style="margin-top:15px"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- 5. SEKME: DUYURU -->
+<div id="duyuru" class="tab-content">
+<h3>📢 Sınıf Duyurusu</h3>
+<select id="duyuruSinif">
+<option>4. Sınıf</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option>
+<option>8. Sınıf</option><option>9. Sınıf</option><option>10. Sınıf</option>
+<option>11. Sınıf</option><option>12. Sınıf</option>
+</select><br>
+<input type="text" id="duyuruBaslik" placeholder="Başlık" style="width:100%;margin:8px 0">
+<textarea id="duyuruMetin" placeholder="Duyuru metni..." style="width:100%;height:80px"></textarea><br>
+<button onclick="duyuruGonder()" style="background:#ff9800">Yayınla</button>
+</div>
+</div>
+
 <script>
-const STORAGE_KEY='ogrenciler_v6';
+const STORAGE='ogrenciler_v6';
 const DERS_KEY='sinif_dersleri_v2';
 
-function ogrencileriGetir(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}
-function ogrencileriKaydet(l){localStorage.setItem(STORAGE_KEY,JSON.stringify(l))}
-function dersleriGetir(){return JSON.parse(localStorage.getItem(DERS_KEY)||'{}')}
-function dersleriKaydet(d){localStorage.setItem(DERS_KEY,JSON.stringify(d))}
-
-function sekmeAc(n){
-document.querySelectorAll('.sekme').forEach(b=>b.classList.remove('aktif'));
-document.querySelectorAll('.tab-icerik').forEach(t=>t.classList.remove('aktif'));
-document.querySelectorAll('.sekme')[n-1].classList.add('aktif');
-document.getElementById('tab'+n).classList.add('aktif');
-if(n===3||n===4) listeleOgrenciler();
-if(n===2) dersleriListeleAdmin();
+function sekmeAc(id,btn){
+document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('aktif'));
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
+document.getElementById(id).classList.add('aktif');
+btn.classList.add('aktif');
+if(id==='liste')listeleOgrenciler();
+if(id==='ders')dersListele();
 }
+
+function ogrencileriGetir(){return JSON.parse(localStorage.getItem(STORAGE)||'[]')}
+function ogrencileriKaydet(l){localStorage.setItem(STORAGE,JSON.stringify(l))}
 
 function ogrenciEkle(){
-let ad=document.getElementById('yeniAd').value.trim();
-let sinif=document.getElementById('yeniSinif').value.trim();
-let sifre=document.getElementById('yeniSifre').value.trim();
-if(!ad||!sinif||!sifre){alert('Ad, sınıf, şifre zorunlu');return;}
+let sinif=document.getElementById('sinif').value;
+let ad=document.getElementById('ad').value.trim();
+let sifre=document.getElementById('sifre').value;
+if(!ad||!sifre){alert('Doldurun');return;}
 let ogrenciler=ogrencileriGetir();
-if(ogrenciler.find(o=>o.ad.toLowerCase()===ad.toLowerCase())){alert('Bu öğrenci zaten var!');return;}
+if(ogrenciler.find(o=>o.ad===ad)){alert('Bu öğrenci var');return;}
 ogrenciler.push({ad:ad,sinif:sinif,sifre:sifre,notlar:{}});
 ogrencileriKaydet(ogrenciler);
-document.getElementById('yeniAd').value='';
-document.getElementById('yeniSifre').value='';
-listeleOgrenciler();
-alert('Öğrenci eklendi!');
+alert('Eklendi');
+document.getElementById('ad').value='';
+document.getElementById('sifre').value='';
 }
 
-function dersEkleAdmin(){
-let sinif=document.getElementById('dersSinifSec').value;
-let ders=document.getElementById('yeniDersAdmin').value.trim();
-if(!ders){alert('Ders adı girin');return;}
-let dersler=dersleriGetir();
+function dersEkle(){
+let sinif=document.getElementById('dersSinif').value;
+let ders=document.getElementById('dersAdi').value.trim();
+if(!ders){alert('Ders adı yazın');return;}
+let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
 if(!dersler[sinif])dersler[sinif]=[];
-if(dersler[sinif].includes(ders)){alert('Bu ders zaten var');return;}
+if(dersler[sinif].includes(ders)){alert('Ders var');return;}
 dersler[sinif].push(ders);
-dersleriKaydet(dersler);
-document.getElementById('yeniDersAdmin').value='';
-dersleriListeleAdmin();
-alert(sinif+' için ders eklendi!');
+localStorage.setItem(DERS_KEY,JSON.stringify(dersler));
+alert('Ders eklendi');
+document.getElementById('dersAdi').value='';
+dersListele();
 }
 
-function dersleriListeleAdmin(){
-let sinif=document.getElementById('dersSinifSec').value;
-let dersler=dersleriGetir();
-let liste=dersler[sinif]||[];
-let html='<b>'+sinif+' Dersleri:</b>';
-if(liste.length===0)html+='<p>Ders yok</p>';
-liste.forEach((d,i)=>{
-html+=`<div class="ders-item">${d} <button class="btn-kucuk btn-sil" onclick="dersSilAdmin('${sinif}',${i})">Sil</button></div>`;
+function dersListele(){
+let dersler=JSON.parse(localStorage.getItem(DERS_KEY)||'{}');
+let html='';
+Object.keys(dersler).forEach(s=>{
+html+=`<b>${s}:</b> ${dersler[s].join(', ')}<br>`;
 });
-document.getElementById('dersListesi').innerHTML=html;
+document.getElementById('dersListesi').innerHTML=html||'Ders yok';
 }
 
-function dersSilAdmin(sinif,index){
-if(!confirm('Ders silinsin mi?'))return;
-let dersler=dersleriGetir();
-dersler[sinif].splice(index,1);
-dersleriKaydet(dersler);
-dersleriListeleAdmin();
-}
-
+// SIRALI LİSTELEME
 function listeleOgrenciler(){
 let ogrenciler=ogrencileriGetir();
-let ogrSec=document.getElementById('ogrSec');
-let ogrListesi=document.getElementById('ogrListesi');
-ogrSec.innerHTML='';
-ogrListesi.innerHTML='';
-if(ogrenciler.length===0){ogrListesi.innerHTML='Henüz öğrenci yok';return;}
-ogrenciler.sort((a,b)=>{if(a.sinif!==b.sinif)return a.sinif.localeCompare(b.sinif);let ortA=tumOrtalama(a),ortB=tumOrtalama(b);return ortB-ortA});
-ogrenciler.forEach((o,i)=>{
-ogrSec.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
-let genelOrt = tumOrtalama(o);
-ogrListesi.innerHTML+=`<div class="ogr-kart"><input type="checkbox" class="secim" data-index="${i}" style="margin-right:10px"><b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}<br><small>📊 Genel Ort: <b style="color:green">${genelOrt}</b></small><br><button class="btn-kucuk btn-gor" onclick="notlariGoster(${i})">👁️ Notları Gör</button><button class="btn-kucuk btn-sil" onclick="ogrenciSil(${i})">🗑️ Tek Sil</button></div>`;
+ogrenciler.sort((a,b)=>{
+if(a.sinif!==b.sinif)return a.sinif.localeCompare(b.sinif);
+let ortA=tumOrtalama(a),ortB=tumOrtalama(b);
+return ortB-ortA;
 });
+let html='';
+ogrenciler.forEach(o=>{
+html+=`<div class="ogr-kart"><b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}</div>`;
+});
+document.getElementById('ogrListesi').innerHTML=html||'Öğrenci yok';
 }
 
 function tumOrtalama(ogr){
-let notlar=ogr.notlar||{};
-let tumNotlar=[];
-Object.values(notlar).forEach(n=>{[n.y1,n.y2,n.y3,n.y4].forEach(x=>{if(x!==''&&!isNaN(x))tumNotlar.push(Number(x))})});
-if(tumNotlar.length===0)return'-';
-return(tumNotlar.reduce((a,b)=>a+b,0)/tumNotlar.length).toFixed(1);
+if(!ogr.notlar)return'-';
+let tum=[];
+Object.values(ogr.notlar).forEach(n=>{
+[not.y1,not.y2,not.y3,not.y4].forEach(x=>{if(x!==''&&!isNaN(x))tum.push(Number(x))});
+if(tum.length===0)return'-';
+return (tum.reduce((a,b)=>a+b,0)/tum.length).toFixed(1);
 }
 
-function ortalamaHesapla(notlar){
-let notlarArr=[notlar.y1,notlar.y2,notlar.y3,notlar.y4].filter(n=>n!==''&&!isNaN(n)).map(Number);
-if(notlarArr.length===0)return'-';
-let ort=notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length;
-return ort.toFixed(1);
+// TOPLU NOT GİRİŞİ
+function sinifOgrencileriYukle(){
+let sinif=document.getElementById('notSinif').value;
+let ogrenciler=ogrencileriGetir().filter(o=>o.sinif===sinif);
+let sel=document.getElementById('notOgrenci');
+sel.innerHTML='<option>Öğrenci seç...</option>';
+sel.disabled=false;
+ogrenciler.forEach(o=>sel.innerHTML+=`<option>${o.ad}</option>`);
+sel.onchange=ogrenciSec;
 }
 
-function notKaydet(){
-let idx=parseInt(document.getElementById('ogrSec').value);
-let ders=document.getElementById('dersSec').value.trim();
-let puan=document.getElementById('puan').value;
-if(!ders||!puan||puan<0||puan>100){alert('Ders ve 0-100 arası not girin');return;}
+function ogrenciSec(){
+let ad=document.getElementById('notOgrenci').value;
+let ogr=ogrencileriGetir().find(o=>o.ad===ad);
+if(!ogr)return;
+document.getElementById('notGirisAlani').style.display='block';
+let dersSel=document.getElementById('notDers');
+dersSel.innerHTML='<option>Ders seç...</option>';
+Object.keys(ogr.notlar||{}).forEach(d=>dersSel.innerHTML+=`<option>${d}</option>`);
+let html='<b>Mevcut Notlar:</b><br>';
+Object.keys(ogr.notlar||{}).forEach(d=>{
+let n=ogr.notlar;
+html+=`${d}: ${n.y1||'-'}|${n.y2||'-'}|${n.y3||'-'}|${n.y4||'-'}<br>`;
+});
+document.getElementById('mevcutNotlar').innerHTML=html;
+dersSel.onchange=dersSec;
+}
+
+function dersSec(){
+let ad=document.getElementById('notOgrenci').value;
+let ders=document.getElementById('notDers').value;
+let ogr=ogrencileriGetir().find(o=>o.ad===ad);
+let n=ogr.notlar||{y1:'',y2:'',y3:'',y4:''};
+document.getElementById('not1').value=n.y1||'';
+document.getElementById('not2').value=n.y2||'';
+document.getElementById('not3').value=n.y3||'';
+document.getElementById('not4').value=n.y4||'';
+}
+
+function notKaydetAdmin(){
+let ad=document.getElementById('notOgrenci').value;
+let ders=document.getElementById('notDers').value;
+if(ders==='Ders seç...'){alert('Ders seçin');return;}
 let ogrenciler=ogrencileriGetir();
+let idx=ogrenciler.findIndex(o=>o.ad===ad);
 if(!ogrenciler[idx].notlar)ogrenciler[idx].notlar={};
-if(!ogrenciler[idx].notlar)ogrenciler[idx].notlar={y1:'',y2:'',y3:'',y4:''};
-ogrenciler[idx].notlar.y1=puan;
+ogrenciler[idx].notlar[y1]=document.getElementById('not1').value;
+ogrenciler[idx].notlar[y2]=document.getElementById('not2').value;
+ogrenciler[idx].notlar[y3]=document.getElementById('not3').value;
+ogrenciler[idx].notlar[y4]=document.getElementById('not4').value;
 ogrencileriKaydet(ogrenciler);
-alert(ders+' 1. Yazılı kaydedildi!');
-document.getElementById('dersSec').value='';
-document.getElementById('puan').value='';
+alert('Kaydedildi!');
+ogrenciSec();
 }
 
-function ogrenciSil(i){if(confirm('Silinsin mi?')){let o=ogrencileriGetir();o.splice(i,1);ogrencileriKaydet(o);listeleOgrenciler()}}
-function secTum(){document.querySelectorAll('.secim').forEach(c=>c.checked=true)}
-function topluSil(){let secilen=[];document.querySelectorAll('.secim:checked').forEach(c=>secilen.push(parseInt(c.dataset.index)));if(secilen.length===0){alert('Öğrenci seçin');return}if(!confirm(secilen.length+' öğrenci silinsin mi?'))return;let o=ogrencileriGetir();secilen.sort((a,b)=>b-a).forEach(i=>o.splice(i,1));ogrencileriKaydet(o);listeleOgrenciler()}
-function notlariGoster(i){let o=ogrencileriGetir()[i];let txt=o.ad+' - '+o.sinif+'\n\n';let notlar=o.notlar||{};if(Object.keys(notlar).length===0){txt+='Not yok'}else{Object.keys(notlar).forEach(d=>{let n=notlar[d];txt+=d+': '+[n.y1,n.y2,n.y3,n.y4].filter(x=>x!=='').join(', ')+'\n'})}alert(txt)}
-function pdfIndir(){const{jsPDF}=window.jspdf;let doc=new jsPDF();let ogrenciler=ogrencileriGetir();let y=20;doc.setFontSize(16);doc.text('Öğrenci Not Listesi',105,y,{align:'center'});y+=10;ogrenciler.forEach(o=>{y+=10;doc.setFontSize(12);doc.text(o.ad+' - '+o.sinif+' - Ort: '+tumOrtalama(o),14,y);y+=5;let notlar=o.notlar||{};Object.keys(notlar).forEach(d=>{let n=notlar[d];doc.setFontSize(10);doc.text(' '+d+': '+[n.y1,n.y2,n.y3,n.y4].filter(x=>x!=='').join(', '),18,y);y+=5;if(y>270){doc.addPage();y=20}})});doc.save('not_listesi.pdf')}
-
-function excelIndir(){
-let ogrenciler=ogrencileriGetir();
-let ws_data=[];
-ws_data.push(['Ad Soyad','Sınıf','Ders','1. Yazılı','2. Yazılı','3. Yazılı','4. Yazılı','Ders Ortalama','Genel Ortalama']);
-ogrenciler.forEach(o=>{
-let notlar=o.notlar||{};
-let genelOrt=tumOrtalama(o);
-if(Object.keys(notlar).length===0){
-ws_data.push([o.ad,o.sinif,'-','-','-','-','-',genelOrt]);
-}else{
-Object.keys(notlar).forEach(ders=>{
-let n=notlar;
-let dersOrt=ortalamaHesapla(n);
-ws_data.push([o.ad,o.sinif,ders,n.y1||'',n.y2||'',n.y3||'',n.y4||'',dersOrt,genelOrt]);
-});
-}
-});
-let ws=XLSX.utils.aoa_to_sheet(ws_data);
-let wb=XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb,ws,"Not Listesi");
-XLSX.writeFile(wb,"not_listesi.xlsx");
+// DUYURU
+function duyuruGonder(){
+let sinif=document.getElementById('duyuruSinif').value;
+let baslik=document.getElementById('duyuruBaslik').value;
+let metin=document.getElementById('duyuruMetin').value;
+if(!baslik||!metin){alert('Doldurun');return;}
+let duyurular=JSON.parse(localStorage.getItem('duyurular')||'[]');
+duyurular.push({sinif,baslik,metin,tarih:new Date().toLocaleDateString('tr-TR')});
+localStorage.setItem('duyurular',JSON.stringify(duyurular));
+alert('Duyuru yayınlandı!');
+document.getElementById('duyuruBaslik').value='';
+document.getElementById('duyuruMetin').value='';
 }
 </script>
 </body>
