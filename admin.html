@@ -2,36 +2,25 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Not Sistemi v3</title>
+<title>Not Sistemi - Admin</title>
 <style>
-body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
-.container{max-width:700px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-.tab-buttons{display:flex;margin-bottom:20px;border-bottom:2px solid #ddd}
-.tab-btn{flex:1;padding:12px;border:none;background:#eee;cursor:pointer;font-size:15px;font-weight:bold}
-.tab-btn.active{background:#007bff;color:white}
-.tab-content{display:none}
-.tab-content.active{display:block}
-input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px;box-sizing:border-box;font-size:15px}
-button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer;font-size:16px;width:100%;margin-top:10px}
+body{font-family:'Segoe UI',Arial;background:#f5f7fa;margin:0;padding:20px}
+.container{max-width:700px;margin:auto;background:white;padding:25px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+h2{color:#2c3e50;margin-top:0;border-bottom:2px solid #007bff;padding-bottom:8px}
+input,select{width:100%;padding:11px;margin:8px 0;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;font-size:15px}
+button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-radius:6px;cursor:pointer;font-size:16px;width:100%;margin-top:12px;font-weight:bold}
 button.ekle:hover{background:#218838}
-.sifre-kutu{background:#f8f9fa;padding:12px;border-left:4px solid #007bff;margin:8px 0;font-family:monospace;border-radius:5px}
+.ogrenci-kutu{background:#f8f9fa;border-left:4px solid #007bff;padding:14px;margin:10px 0;border-radius:6px;display:flex;justify-content:space-between;align-items:center}
+.ogrenci-bilgi{flex:1}
+.sil-btn{background:#dc3545;padding:8px 14px;font-size:13px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:bold;margin-left:10px}
+.sil-btn:hover{background:#c82333}
+#liste{margin-top:20px;min-height:50px}
 </style>
 </head>
 <body>
 <div class="container">
-<h2>Not Sistemi - Admin Panel</h2>
-
-<div class="tab-buttons">
-<button class="tab-btn active" onclick="sekmeAc('ogrenci',event)">1. Öğrenci Ekle</button>
-<button class="tab-btn" onclick="sekmeAc('not',event)">2. Not Gir</button>
-<button class="tab-btn" onclick="sekmeAc('sifreSekme',event)">3. Şifre Listesi</button>
-</div>
-
-<!-- 1. ÖĞRENCİ EKLE -->
-<div id="ogrenci" class="tab-content active">
-<h3>Yeni Öğrenci Ekle</h3>
+<h2>1. Öğrenci Ekle</h2>
 <input type="text" id="adInput" placeholder="Öğrenci Ad Soyad">
-<input type="password" id="sifreInput" placeholder="Veli Şifresi Belirle">
 <select id="sinifInput">
 <option>5. Sınıf</option>
 <option>6. Sınıf</option>
@@ -39,77 +28,65 @@ button.ekle:hover{background:#218838}
 <option>8. Sınıf</option>
 </select>
 <button class="ekle" onclick="ogrenciEkle()">Öğrenci Kaydet</button>
-</div>
 
-<!-- 2. NOT GİR -->
-<div id="not" class="tab-content">
-<h3>Not Girişi</h3>
-<select id="ogrenciSec"><option>Önce öğrenci ekleyin</option></select>
-<input type="text" id="ders" placeholder="Ders Adı">
-<input type="number" id="puan" placeholder="Not 0-100" min="0" max="100">
-<button class="ekle" onclick="notEkle()">Not Kaydet</button>
-</div>
-
-<!-- 3. ŞİFRE LİSTESİ -->
-<div id="sifreSekme" class="tab-content">
-<h3>Veli Şifreleri</h3>
-<button class="ekle" onclick="kopyala()">Tümünü Kopyala</button>
-<div id="sifreListesi" style="margin-top:15px">Henüz öğrenci yok</div>
-</div>
-
+<h2 style="margin-top:35px">2. Kayıtlı Öğrenciler</h2>
+<div id="liste">Henüz öğrenci yok</div>
 </div>
 
 <script>
-let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler')) || [];
-
-function sekmeAc(sekmAdi,event){
-document.querySelectorAll('.tab-content').forEach(s=>s.classList.remove('active'));
-document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-document.getElementById(sekmAdi).classList.add('active');
-event.target.classList.add('active');
-if(sekmAdi==='sifreSekme') sifreListele();
-if(sekmAdi==='not') selectGuncelle();
-}
+let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler_v2')) || [];
 
 function ogrenciEkle(){
-let ad=document.getElementById('adInput').value.trim();
-let sifre=document.getElementById('sifreInput').value.trim();
-let sinif=document.getElementById('sinifInput').value;
-if(!ad ||!sifre){alert('Ad ve Şifre girin');return;}
-ogrenciler.push({ad,sifre,sinif});
-localStorage.setItem('ogrenciler', JSON.stringify(ogrenciler));
-document.getElementById('adInput').value='';
-document.getElementById('sifreInput').value='';
-alert('Öğrenci eklendi!');
+let ad = document.getElementById('adInput').value.trim();
+let sinif = document.getElementById('sinifInput').value;
+
+if(!ad){ 
+alert('Ad Soyad girin!'); 
+return; 
 }
 
-function selectGuncelle(){
-let select=document.getElementById('ogrenciSec');
-select.innerHTML='';
-if(ogrenciler.length===0){select.innerHTML='<option>Önce öğrenci ekleyin</option>';return;}
-ogrenciler.forEach((o,i)=>{
-select.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
+// Aynı isim+sınıf kontrolü
+if(ogrenciler.find(o => o.ad.toLowerCase() === ad.toLowerCase() && o.sinif === sinif)){
+alert('Bu öğrenci zaten kayıtlı!');
+return;
+}
+
+ogrenciler.push({ad:ad, sinif:sinif, id:Date.now()});
+localStorage.setItem('ogrenciler_v2', JSON.stringify(ogrenciler));
+
+document.getElementById('adInput').value = '';
+listele();
+alert(ad + ' eklendi ✓');
+}
+
+function ogrenciSil(id){
+if(confirm('Bu öğrenciyi silmek istediğinize emin misiniz?')){
+ogrenciler = ogrenciler.filter(o => o.id !== id);
+localStorage.setItem('ogrenciler_v2', JSON.stringify(ogrenciler));
+listele();
+}
+}
+
+function listele(){
+let div = document.getElementById('liste');
+if(ogrenciler.length === 0){
+div.innerHTML = 'Henüz öğrenci yok';
+return;
+}
+
+div.innerHTML = '';
+ogrenciler.forEach(o => {
+div.innerHTML += `
+<div class="ogrenci-kutu">
+<div class="ogrenci-bilgi"><b>${o.ad}</b> - ${o.sinif}</div>
+<button class="sil-btn" onclick="ogrenciSil(${o.id})">Sil</button>
+</div>
+`;
 });
 }
 
-function sifreListele(){
-let div=document.getElementById('sifreListesi');
-if(ogrenciler.length===0){div.innerHTML='Henüz öğrenci yok';return;}
-let html='';
-ogrenciler.forEach(o=>{
-html+=`<div class="sifre-kutu"><b>${o.ad}</b> - ${o.sinif}<br>Şifre: ${o.sifre}</div>`;
-});
-div.innerHTML=html;
-}
-
-function kopyala(){
-if(ogrenciler.length===0){alert('Kopyalanacak öğrenci yok');return;}
-let metin=ogrenciler.map(o=>`${o.ad} - ${o.sinif} | Şifre: ${o.sifre}`).join('\n');
-navigator.clipboard.writeText(metin);
-alert('Tüm şifreler kopyalandı!');
-}
-
-function notEkle(){alert('Not kaydetme fonksiyonu sonra eklenecek');}
+// Sayfa açılınca listeyi göster
+listele();
 </script>
 </body>
 </html>
