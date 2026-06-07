@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{margin:0;background:#f5f5f5;font-family:Arial;padding:20px}
-.kutu{max-width:800px;margin:auto;background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1)}
+.kutu{max-width:900px;margin:auto;background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1)}
 h2{color:#667eea;text-align:center}
 .sekme{background:#667eea;color:white;padding:12px;border:none;border-radius:8px;margin:5px;cursor:pointer;font-weight:bold}
 .sekme.aktif{background:#4caf50}
@@ -17,15 +17,17 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 .btn-kucuk{padding:6px 12px;margin:3px;font-size:13px;cursor:pointer;border-radius:5px;border:none}
 .btn-gor{background:#2196f3;color:white}
 .btn-sil{background:#f44336;color:white}
+@media print{body{background:white}.kutu{box-shadow:none}.sekme,button{display:none}}
 </style>
 </head>
 <body>
 <div class="kutu">
 <h2>⚙️ Admin Panel</h2>
+<button onclick="pdfIndir()" style="background:#ff5722;margin-bottom:15px">📄 PDF Olarak İndir</button>
 
 <button class="sekme aktif" onclick="sekmeAc(1)">1. Öğrenci Ekle</button>
 <button class="sekme" onclick="sekmeAc(2)">2. Not Gir</button>
-<button class="sekme" onclick="sekmeAc(3)">3. Takip & Düzenle</button>
+<button class="sekme" onclick="sekmeAc(3)">3. Takip & Sil</button>
 
 <div id="tab1" class="tab-icerik" style="display:block">
 <h3>Öğrenci Ekle</h3>
@@ -41,15 +43,9 @@ button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radiu
 </div>
 
 <div id="tab2" class="tab-icerik">
-<h3>Not Gir</h3>
+<h3>Sen Not Gir</h3>
 <select id="ogrSec"></select>
-<select id="dersSec">
-<option>Matematik</option>
-<option>Türkçe</option>
-<option>Fen</option>
-<option>Sosyal</option>
-<option>İngilizce</option>
-</select>
+<input type="text" id="dersSec" placeholder="Ders adı">
 <input type="number" id="puan" min="0" max="100" placeholder="Not 0-100">
 <button onclick="notKaydet()">Kaydet</button>
 </div>
@@ -83,7 +79,7 @@ let sifre=document.getElementById('yeniSifre').value.trim();
 let sinif=document.getElementById('yeniSinif').value;
 if(!ad||!sifre){alert('Ad ve şifre girin!');return;}
 let ogrenciler=ogrencileriGetir();
-ogrenciler.push({ad:ad,sifre:sifre,sinif:sinif,notlar:[]});
+ogrenciler.push({ad:ad,sifre:sifre,sinif:sinif,dersler:[],notlar:{}});
 ogrencileriKaydet(ogrenciler);
 alert('Öğrenci eklendi!');
 document.getElementById('yeniAd').value='';
@@ -99,11 +95,10 @@ ogrListesi.innerHTML='';
 
 ogrenciler.forEach((o,i)=>{
 ogrSec.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
-let notSayisi=o.notlar?o.notlar.length:0;
-let sonNot=notSayisi>0?o.notlar[notSayisi-1].ders+': '+o.notlar[notSayisi-1].puan:'Henüz not yok';
+let dersSayisi=o.dersler?o.dersler.length:0;
 ogrListesi.innerHTML+=`<div class="ogr-kart">
 <b>${o.ad}</b> - ${o.sinif} | Şifre: ${o.sifre}<br>
-<small>📝 ${notSayisi} not girilmiş | Son: ${sonNot}</small><br>
+<small>📚 ${dersSayisi} ders açılmış</small><br>
 <button class="btn-kucuk btn-gor" onclick="notlariGoster(${i})">👁️ Notları Gör</button>
 <button class="btn-kucuk btn-sil" onclick="ogrenciSil(${i})">🗑️ Öğrenci Sil</button>
 </div>`;
@@ -112,38 +107,70 @@ ogrListesi.innerHTML+=`<div class="ogr-kart">
 
 function notKaydet(){
 let idx=document.getElementById('ogrSec').value;
-let ders=document.getElementById('dersSec').value;
+let ders=document.getElementById('dersSec').value.trim();
 let puan=document.getElementById('puan').value;
-if(!puan||puan<0||puan>100){alert('0-100 arası not girin');return;}
+if(!ders||!puan||puan<0||puan>100){alert('Ders ve 0-100 arası not girin');return;}
 let ogrenciler=ogrencileriGetir();
-ogrenciler[idx].notlar.push({ders:ders,puan:puan,tarih:new Date().toLocaleDateString('tr-TR')});
+if(!ogrenciler[idx].dersler.includes(ders)) ogrenciler[idx].dersler.push(ders);
+if(!ogrenciler[idx].notlar[ders]) ogrenciler[idx].notlar[ders]={y1:'',y2:'',y3:'',y4:''};
+ogrenciler[idx].notlar[ders].y1=puan;
 ogrencileriKaydet(ogrenciler);
 alert('Not kaydedildi!');
+document.getElementById('dersSec').value='';
 document.getElementById('puan').value='';
 }
 
 function notlariGoster(index){
 let ogrenciler=ogrencileriGetir();
 let ogr=ogrenciler[index];
-let html=`${ogr.ad} - ${ogr.sinif}\\n\\n`;
-if(!ogr.notlar||ogr.notlar.length===0){
-html+='Henüz not girilmemiş';
+let html=`${ogr.ad} - ${ogr.sinif}\n\n`;
+if(!ogr.dersler||ogr.dersler.length===0){
+html+='Henüz ders eklenmemiş';
 }else{
-ogr.notlar.forEach((n,i)=>{
-html+=`${i+1}. ${n.ders}: ${n.puan} (${n.tarih})\\n`;
+ogr.dersler.forEach(ders => {
+let not=ogr.notlar[ders]||{y1:'',y2:'',y3:'',y4:''};
+let notlarArr=[not.y1,not.y2,not.y3,not.y4].filter(n=>n!=='').map(Number);
+let ort=notlarArr.length>0?(notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1):'-';
+html+=`${ders}: 1.${not.y1||'-'} 2.${not.y2||'-'} 3.${not.y3||'-'} 4.${not.y4||'-'} | ORT: ${ort}\n`;
 });
-html+='\\nNot silmek için bana söyle, tek sileriz.';
 }
 alert(html);
 }
 
 function ogrenciSil(index){
-if(!confirm('Bu öğrenciyi komple silmek istiyor musun?')) return;
+if(!confirm('Bu öğrenciyi komple silmek istiyor musun? Veli girdiği tüm dersler ve notlar silinir!')) return;
 let ogrenciler=ogrencileriGetir();
 ogrenciler.splice(index,1);
 ogrencileriKaydet(ogrenciler);
 alert('Öğrenci silindi!');
 listeleOgrenciler();
+}
+
+function pdfIndir(){
+let ogrenciler = ogrencileriGetir();
+let html = `<h1 style="text-align:center">Öğrenci Not Listesi</h1><p style="text-align:center">Tarih: ${new Date().toLocaleDateString('tr-TR')}</p><hr>`;
+
+ogrenciler.forEach(o => {
+html += `<h3>${o.ad} - ${o.sinif} | Şifre: ${o.sifre}</h3>`;
+if(!o.dersler || o.dersler.length === 0){
+html += '<p>Henüz ders yok</p>';
+}else{
+html += '<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%;margin-bottom:20px"><tr style="background:#667eea;color:white"><th>Ders</th><th>1.Yazılı</th><th>2.Yazılı</th><th>3.Yazılı</th><th>4.Yazılı</th><th>Ortalama</th></tr>';
+o.dersler.forEach(ders => {
+let not = o.notlar[ders]||{y1:'',y2:'',y3:'',y4:''};
+let notlarArr = [not.y1,not.y2,not.y3,not.y4].filter(n=>n!=='').map(Number);
+let ort = notlarArr.length>0? (notlarArr.reduce((a,b)=>a+b,0)/notlarArr.length).toFixed(1) : '-';
+html += `<tr><td><b>${ders}</b></td><td>${not.y1||'-'}</td><td>${not.y2||'-'}</td><td>${not.y3||'-'}</td><td>${not.y4||'-'}</td><td style="font-weight:bold;color:green">${ort}</td></tr>`;
+});
+html += '</table>';
+}
+html += '<hr>';
+});
+
+let pencere = window.open('', '_blank');
+pencere.document.write(`<html><head><title>Not Listesi PDF</title><style>body{font-family:Arial;padding:20px}table{page-break-inside:auto}tr{page-break-inside:avoid}</style></head><body>${html}</body></html>`);
+pencere.document.close();
+setTimeout(()=>{pencere.print();}, 500);
 }
 </script>
 </body>
