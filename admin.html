@@ -5,15 +5,16 @@
 <title>Not Sistemi</title>
 <style>
 body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
-.container{max-width:700px;margin:auto;background:white;padding:20px;border-radius:10px}
+.container{max-width:700px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
 .tab-buttons{display:flex;margin-bottom:20px;border-bottom:2px solid #ddd}
 .tab-btn{flex:1;padding:12px;border:none;background:#eee;cursor:pointer;font-size:15px;font-weight:bold}
 .tab-btn.active{background:#007bff;color:white}
 .tab-content{display:none}
 .tab-content.active{display:block}
-input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px;box-sizing:border-box}
-button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer;font-size:16px;width:100%}
-.sifre-kutu{background:#f8f9fa;padding:12px;border-left:4px solid #007bff;margin:8px 0;font-family:monospace}
+input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px;box-sizing:border-box;font-size:15px}
+button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer;font-size:16px;width:100%;margin-top:10px}
+button.ekle:hover{background:#218838}
+.sifre-kutu{background:#f8f9fa;padding:12px;border-left:4px solid #007bff;margin:8px 0;font-family:monospace;border-radius:5px}
 </style>
 </head>
 <body>
@@ -53,13 +54,13 @@ button.ekle{background:#28a745;color:white;border:none;padding:12px 20px;border-
 <div id="sifre" class="tab-content">
 <h3>Veli Şifreleri</h3>
 <button class="ekle" onclick="kopyala()">Tümünü Kopyala</button>
-<div id="sifreListesi"></div>
+<div id="sifreListesi" style="margin-top:15px">Henüz öğrenci yok</div>
 </div>
 
 </div>
 
 <script>
-let ogrenciler = [];
+let ogrenciler = JSON.parse(localStorage.getItem('ogrenciler')) || [];
 
 function sekmeAc(sekmAdi,event){
 document.querySelectorAll('.tab-content').forEach(s=>s.classList.remove('active'));
@@ -67,15 +68,16 @@ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 document.getElementById(sekmAdi).classList.add('active');
 event.target.classList.add('active');
 if(sekmAdi==='sifre') sifreListele();
+if(sekmAdi==='not') selectGuncelle();
 }
 
 function ogrenciEkle(){
-let ad=document.getElementById('ad').value;
-let sifre=document.getElementById('sifre').value;
+let ad=document.getElementById('ad').value.trim();
+let sifre=document.getElementById('sifre').value.trim();
 let sinif=document.getElementById('sinif').value;
 if(!ad ||!sifre){alert('Ad ve Şifre girin');return;}
 ogrenciler.push({ad,sifre,sinif});
-selectGuncelle();
+localStorage.setItem('ogrenciler', JSON.stringify(ogrenciler));
 document.getElementById('ad').value='';
 document.getElementById('sifre').value='';
 alert('Öğrenci eklendi!');
@@ -84,6 +86,7 @@ alert('Öğrenci eklendi!');
 function selectGuncelle(){
 let select=document.getElementById('ogrenciSec');
 select.innerHTML='';
+if(ogrenciler.length===0){select.innerHTML='<option>Önce öğrenci ekleyin</option>';return;}
 ogrenciler.forEach((o,i)=>{
 select.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
 });
@@ -92,19 +95,21 @@ select.innerHTML+=`<option value="${i}">${o.ad} - ${o.sinif}</option>`;
 function sifreListele(){
 let div=document.getElementById('sifreListesi');
 if(ogrenciler.length===0){div.innerHTML='Henüz öğrenci yok';return;}
-div.innerHTML='';
+let html='';
 ogrenciler.forEach(o=>{
-div.innerHTML+=`<div class="sifre-kutu"><b>${o.ad}</b> - ${o.sinif}<br>Şifre: ${o.sifre}</div>`;
+html+=`<div class="sifre-kutu"><b>${o.ad}</b> - ${o.sinif}<br>Şifre: ${o.sifre}</div>`;
 });
+div.innerHTML=html;
 }
 
 function kopyala(){
+if(ogrenciler.length===0){alert('Kopyalanacak öğrenci yok');return;}
 let metin=ogrenciler.map(o=>`${o.ad} - ${o.sinif} | Şifre: ${o.sifre}`).join('\n');
 navigator.clipboard.writeText(metin);
 alert('Tüm şifreler kopyalandı!');
 }
 
-function notEkle(){alert('Not kaydetme fonksiyonu eklenecek');}
+function notEkle(){alert('Not kaydetme fonksiyonu sonra eklenecek');}
 </script>
 </body>
 </html>
