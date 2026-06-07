@@ -2,248 +2,345 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel v42</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel v44 Full</title>
 <style>
-body{font-family:Arial;background:#667eea;padding:15px;margin:0}
-.kutu{background:white;padding:20px;border-radius:12px;max-width:900px;margin:auto}
-.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px}
-.tab-btn{flex:1;min-width:110px;padding:12px;background:#ddd;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px}
-.tab-btn.aktif{background:#4caf50;color:white}
-.tab{display:none}.tab.aktif{display:block}
-input,select,textarea{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:6px;font-size:16px;box-sizing:border-box}
-button{padding:12px 20px;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;margin:5px 0;font-size:16px}
-button.kirmizi{background:#f44336}
-.mesaj{margin-top:10px;padding:10px;border-radius:6px;text-align:center;font-weight:bold}
-.basari{background:#d4edda;color:#155724}
-.hata{background:#f8d7da;color:#721c24}
-.ogr-kart{background:#f5f5f5;padding:12px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+body{font-family:Arial;padding:20px;background:#f0f0f0;margin:0}
+.kutu{background:white;padding:20px;border-radius:8px;max-width:1100px;margin:auto;box-shadow:0 2px 5px #ccc}
+.tab{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.tab button{flex:1;padding:12px;border:none;background:#ddd;cursor:pointer;border-radius:5px;font-weight:bold;min-width:150px}
+.tab button.aktif{background:#4CAF50;color:white}
+.sekme{display:none}
+.sekme.aktif{display:block}
+input,select,button,textarea{padding:10px;margin:5px 0;width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:4px}
+button{background:#4CAF50;color:white;border:none;cursor:pointer;font-weight:bold}
+button:hover{background:#45a049}
+button.tehlike{background:#f44336}
+button.tehlike:hover{background:#d32f2f}
+button.sari{background:#ff9800}
+table{width:100%;border-collapse:collapse;margin-top:15px;font-size:13px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#4CAF50;color:white;position:sticky;top:0}
+tr:nth-child(even){background:#f9f9f9}
+tr.secili{background:#c8e6c9}
+label{font-weight:bold;margin-top:10px;display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.kucuk{width:auto;display:inline-block;margin-right:5px}
+.ortalama{font-weight:bold;color:#2e7d32}
+.sil-btn{padding:5px 8px;font-size:12px;width:auto}
+input[type=checkbox]{width:20px;height:20px}
+.flex{display:flex;gap:10px;align-items:center}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>👨‍🏫 Admin Panel v40</h2>
+<h2>👨‍🏫 Admin Panel v44 Full</h2>
 
-<div class="tabs">
-<button class="tab-btn aktif" onclick="sekme('ekle',this)">➕ Öğrenci</button>
-<button class="tab-btn" onclick="sekme('ders',this)">📚 Ders</button>
-<button class="tab-btn" onclick="sekme('liste',this)">👥 Liste</button>
-<button class="tab-btn" onclick="sekme('not',this)">📝 Not</button>
-<button class="tab-btn" onclick="sekme('duyuru',this)">📢 Duyuru</button>
-<button class="tab-btn" onclick="sekme('yedek',this)">💾 Yedek</button>
+<div class="tab">
+<button class="tab-btn aktif" onclick="sekmeAc(event,'ogrenci')">1. Öğrenci Kayıt</button>
+<button class="tab-btn" onclick="sekmeAc(event,'ders')">2. Ders Ekle/Sil</button>
+<button class="tab-btn" onclick="sekmeAc(event,'liste')">3. Öğrenci Listesi</button>
+<button class="tab-btn" onclick="sekmeAc(event,'not')">4. Not Düzenle</button>
+<button class="tab-btn" onclick="sekmeAc(event,'yedek')">5. Excel/PDF</button>
 </div>
 
-<div id="ekle" class="tab aktif">
-<h3>Öğrenci Ekle - Telefon boşluksuz</h3>
-<select id="sinif"><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
-<input id="ad" placeholder="Öğrenci Ad Soyad">
-<input id="tel" type="tel" placeholder="Veli Telefon 05354611015" inputmode="numeric">
-<input id="sifre" type="password" placeholder="Şifre">
-<button onclick="ekle()">Kaydet</button>
-<div id="m1" class="mesaj"></div>
+<!-- 1. ÖĞRENCİ KAYIT + VELİ ŞİFRE -->
+<div id="ogrenci" class="sekme aktif">
+<h3>Öğrenci Kayıt - Veli Şifre</h3>
+<div class="grid">
+<div>
+<label>Öğrenci No:</label><input type="text" id="oNo">
+<label>Ad Soyad:</label><input type="text" id="oAd">
+<label>Sınıf:</label><input type="text" id="oSinif" placeholder="5. Sınıf">
+<label>Veli Şifre:</label><input type="text" id="oSifre">
+<button onclick="ogrenciEkle()">Öğrenci Ekle</button>
+</div>
+<div>
+<h4>Toplu Kayıt</h4>
+<textarea id="toplu" rows="8" placeholder="No,Ad Soyad,Sınıf,Şifre&#10;101,Ali Veli,5. Sınıf,1234&#10;102,Ayşe Yılmaz,5. Sınıf,5678"></textarea>
+<button class="sari" onclick="topluEkle()">Toplu Ekle</button>
+</div>
+</div>
+<p id="oSonuc"></p>
 </div>
 
-<div id="ders" class="tab">
-<h3>Ders Ekle</h3>
-<select id="dsinif"><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
-<input id="dersad" placeholder="Ders Adı">
-<button onclick="dersEkle()">Ekle</button>
-<div id="dersliste" style="margin-top:15px"></div>
+<!-- 2. DERS EKLE ÇIKAR -->
+<div id="ders" class="sekme">
+<h3>Ders Ekle / Çıkar</h3>
+<label>Sınıf Seç:</label>
+<select id="sinifSec" onchange="dersleriYukle()"></select>
+<label>Ders Adı:</label>
+<input type="text" id="dersAdi" placeholder="MATEMATİK">
+<button onclick="dersEkle()">Ders Ekle</button>
+<h4>Ekli Dersler:</h4>
+<div id="dersListesi">Sınıf seçin...</div>
 </div>
 
-<div id="liste" class="tab">
-<h3>Öğrenci Listesi - Sağda Sil butonu var</h3>
-<button onclick="listele()">Yenile</button>
-<div id="list" style="margin-top:15px"></div>
+<!-- 3. ÖĞRENCİ LİSTESİ + SİL + TOPLU SİL -->
+<div id="liste" class="sekme">
+<h3>Kayıtlı Öğrenci Listesi</h3>
+<div class="flex">
+<input type="text" id="arama" placeholder="Ara: No, Ad, Sınıf..." onkeyup="ogrenciListele()">
+<button class="kucuk tehlike" onclick="seciliSil()">Seçili Sil</button>
+<button class="kucuk" onclick="tumSec()">Tümünü Seç</button>
+</div>
+<table id="ogrenciTablo">
+<thead><tr><th><input type="checkbox" id="checkAll" onchange="tumSec()"></th><th>No</th><th>Ad Soyad</th><th>Sınıf</th><th>Şifre</th><th>Sil</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
 
-<div id="not" class="tab">
-<h3>Not Girişi</h3>
-<select id="nsinif" onchange="ogrYukle()"><option>Sınıf seç</option><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
-<select id="nogr"><option>Önce sınıf seç</option></select>
-<select id="nders"><option>Ders seç</option></select>
-<input id="n1" type="number" placeholder="1.Yazılı">
-<input id="n2" type="number" placeholder="2.Yazılı">
-<input id="n3" type="number" placeholder="3.Yazılı">
-<input id="n4" type="number" placeholder="4.Yazılı">
-<button onclick="notKaydet()">Kaydet</button>
-<div id="mnot" class="mesaj"></div>
+<!-- 4. NOT SAYFASI GÖRÜNTÜ + MANUEL DÜZELTME -->
+<div id="not" class="sekme">
+<h3>Not Görüntüle & Manuel Düzelt</h3>
+<label>Öğrenci Seç:</label>
+<select id="notOgrenci" onchange="notlariGetir()"><option value="">Seçin</option></select>
+<div id="notTablo">Öğrenci seçin...</div>
 </div>
 
-<div id="duyuru" class="tab">
-<h3>Duyuru Yayınla</h3>
-<select id="dusinif"><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
-<input id="dbaslik" placeholder="Başlık">
-<textarea id="dmetin" rows="3" placeholder="Duyuru metni"></textarea>
-<button onclick="duyGonder()">Yayınla</button>
-<div id="m5" class="mesaj"></div>
+<!-- 5. İNDİRME YÜKLEME -->
+<div id="yedek" class="sekme">
+<h3>Excel / PDF İndir - Yükle</h3>
+<div class="grid">
+<div>
+<h4>İndir</h4>
+<button onclick="excelIndir('ogrenciler')">Öğrenciler Excel</button>
+<button onclick="excelIndir('dersler')">Dersler Excel</button>
+<button onclick="excelIndir('notlar')">Notlar Excel</button>
+<button class="sari" onclick="pdfIndir()">Not Listesi PDF</button>
 </div>
-
-<div id="yedek" class="tab">
-<h3>💾 GitHub Yedek</h3>
-<p>Öğrenci sil/ekle yaptıktan sonra mutlaka indirip GitHub'a yükle!</p>
-<button onclick="indir()">ogrenciler.json İndir</button>
-<button onclick="indirDers()">dersler.json İndir</button>
-<button onclick="indirDuyuru()">duyurular.json İndir</button>
+<div>
+<h4>JSON Yükle</h4>
+<label>ogrenciler.json:</label>
+<input type="file" id="ogrenciYukle" accept=".json">
+<button class="sari" onclick="jsonYukle('ogrenciYukle','ogrenciler')">Yükle</button>
+<label>dersler.json:</label>
+<input type="file" id="dersYukle" accept=".json">
+<button class="sari" onclick="jsonYukle('dersYukle','dersler')">Yükle</button>
+</div>
+</div>
 </div>
 
 </div>
 
 <script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFveb5yj4Riy4LROg1CvEd-bjkU9jHXhbXF-OAp2xj4wcqsfFKg0mxqbSOgajoIoqa/exec";
 let ogrenciler = [];
-let dersler = {};
-let duyurular = [];
+let dersler = [];
 
-// JSON'dan yükle
-async function veriYukle(){
-  try{
-    let r = await fetch('ogrenciler.json?v='+Date.now());
-    if(r.ok) ogrenciler = await r.json();
-    else ogrenciler = JSON.parse(localStorage.getItem('ogr') || '[]');
-  }catch(e){
-    ogrenciler = JSON.parse(localStorage.getItem('ogr') || '[]');
-  }
+fetch('ogrenciler.json').then(r=>r.json()).then(d=>{ogrenciler=d; ogrenciListele(); notOgrenciYukle();});
+fetch('dersler.json').then(r=>r.json()).then(d=>{dersler=d; sinifListesiYukle();});
 
-  try{
-    let r2 = await fetch('dersler.json?v='+Date.now());
-    if(r2.ok) dersler = await r2.json();
-    else dersler = JSON.parse(localStorage.getItem('ders') || '{}');
-  }catch(e){
-    dersler = JSON.parse(localStorage.getItem('ders') || '{}');
-  }
-
-  try{
-    let r3 = await fetch('duyurular.json?v='+Date.now());
-    if(r3.ok) duyurular = await r3.json();
-    else duyurular = JSON.parse(localStorage.getItem('duy') || '[]');
-  }catch(e){
-    duyurular = JSON.parse(localStorage.getItem('duy') || '[]');
-  }
-}
-veriYukle();
-
-function sekme(id,btn){
-document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktif'));
-document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
-document.getElementById(id).classList.add('aktif');
-btn.classList.add('aktif');
-if(id==='liste')setTimeout(listele,200);
-if(id==='ders')setTimeout(dersListe,200);
+function sekmeAc(evt, sekmAdi) {
+  document.querySelectorAll('.sekme').forEach(s=>s.classList.remove('aktif'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
+  document.getElementById(sekmAdi).classList.add('aktif');
+  evt.currentTarget.classList.add('aktif');
 }
 
-function ekle(){
-let s=document.getElementById('sinif').value;
-let a=document.getElementById('ad').value.trim();
-let t=document.getElementById('tel').value.replace(/\s/g,'');
-let p=document.getElementById('sifre').value.trim();
-let m=document.getElementById('m1');
-m.className='mesaj';
+// 1. ÖĞRENCİ KAYIT
+function ogrenciEkle(){
+  const no=document.getElementById('oNo').value.trim();
+  const ad=document.getElementById('oAd').value.trim();
+  const sinif=document.getElementById('oSinif').value.trim();
+  const sifre=document.getElementById('oSifre').value.trim();
 
-if(!a||!t||!p){m.className='mesaj hata';m.innerText='Tüm alanları doldur!';return;}
-if(ogrenciler.find(x=>x.tel==t)){m.className='mesaj hata';m.innerText='Bu telefon kayıtlı!';return;}
+  if(!no||!ad||!sinif||!sifre){alert('Hepsini doldur!'); return;}
+  if(ogrenciler.find(o=>o.no==no)){alert('Bu no zaten var!'); return;}
 
-ogrenciler.push({ad:a, sinif:s, tel:t, sifre:p, notlar:{}});
-localStorage.setItem('ogr', JSON.stringify(ogrenciler));
-m.className='mesaj basari';m.innerText='✓ Eklendi: '+a;
-document.getElementById('ad').value='';
-document.getElementById('tel').value='';
-document.getElementById('sifre').value='';
+  ogrenciler.push({no,ad,sinif,sifre});
+  document.getElementById('oSonuc').innerHTML = 'Eklendi! Yedek sekmesinden indirip GitHub yükle.';
+  document.getElementById('oNo').value=''; document.getElementById('oAd').value='';
+  ogrenciListele(); notOgrenciYukle();
+}
+
+function topluEkle(){
+  const satirlar = document.getElementById('toplu').value.split('\n').slice(1);
+  let eklendi=0;
+  satirlar.forEach(s=>{
+    const [no,ad,sinif,sifre] = s.split(',');
+    if(no && ad &&!ogrenciler.find(o=>o.no==no.trim())){
+      ogrenciler.push({no:no.trim(),ad:ad.trim(),sinif:sinif.trim(),sifre:sifre.trim()});
+      eklendi++;
+    }
+  });
+  alert(eklendi + ' öğrenci eklendi!');
+  document.getElementById('toplu').value='';
+  ogrenciListele(); notOgrenciYukle();
+}
+
+// 2. DERS
+function sinifListesiYukle(){
+  const sel = document.getElementById('sinifSec');
+  const siniflar = [...new Set(dersler.map(d=>d.sinif))];
+  sel.innerHTML = '<option value="">Sınıf Seçin</option>';
+  siniflar.forEach(s=>sel.innerHTML += `<option value="${s}">${s}</option>`);
+}
+
+function dersleriYukle(){
+  const sinif = document.getElementById('sinifSec').value;
+  const liste = document.getElementById('dersListesi');
+  if(!sinif){liste.innerHTML='Sınıf seçin...'; return;}
+
+  const sinifDers = dersler.find(d=>d.sinif==sinif);
+  const benzersiz = sinifDers? [...new Set(sinifDers.dersler)] : [];
+
+  liste.innerHTML = benzersiz.length==0? 'Ders yok' : '';
+  benzersiz.forEach(d=>{
+    liste.innerHTML += `<div class="flex"><span style="flex:1;padding:8px;background:#f5f5f5">${d}</span>
+    <button class="sil-btn tehlike" onclick="dersSil('${sinif}','${d}')">Sil</button></div>`;
+  });
 }
 
 function dersEkle(){
-let s=document.getElementById('dsinif').value;
-let d=document.getElementById('dersad').value.trim();
-if(!d){alert('Ders yaz!');return;}
-if(!dersler[s])dersler[s]=[];
-if(dersler[s].includes(d)){alert('Ders var!');return;}
-dersler[s].push(d);
-localStorage.setItem('ders', JSON.stringify(dersler));
-alert('Eklendi');
-document.getElementById('dersad').value='';
-dersListe();
+  const sinif = document.getElementById('sinifSec').value;
+  const dersAdi = document.getElementById('dersAdi').value.trim().toUpperCase();
+  if(!sinif ||!dersAdi){alert('Doldurun!'); return;}
+
+  let sinifDers = dersler.find(d=>d.sinif==sinif);
+  if(!sinifDers){sinifDers={sinif:sinif,dersler:[]}; dersler.push(sinifDers);}
+  if(sinifDers.dersler.includes(dersAdi)){alert('Bu ders zaten var!'); return;}
+
+  sinifDers.dersler.push(dersAdi);
+  alert('Eklendi! Yedek sekmesinden indir.');
+  document.getElementById('dersAdi').value='';
+  dersleriYukle();
 }
 
-function dersListe(){
-let h='';
-for(let k in dersler)h+=`<div class="ogr-kart"><b>${k}:</b> ${dersler[k].join(', ')}</div>`;
-document.getElementById('dersliste').innerHTML=h||'Ders yok';
+function dersSil(sinif, dersAdi){
+  if(!confirm(dersAdi + ' silinsin mi?')) return;
+  const sinifDers = dersler.find(d=>d.sinif==sinif);
+  sinifDers.dersler = sinifDers.dersler.filter(d=>d!=dersAdi);
+  alert('Silindi! Yedek sekmesinden indir.');
+  dersleriYukle();
 }
 
-function listele(){
-let h='';
-if(ogrenciler.length==0){
-  h='Öğrenci yok';
-}else{
-  ogrenciler.forEach((x,i)=>{
-    h+=`<div class="ogr-kart">
-      <span>${x.sinif} - ${x.ad} - Tel:${x.tel} - Şifre:${x.sifre}</span>
-      <button class="kirmizi" onclick="sil(${i})">Sil</button>
-    </div>`;
+// 3. ÖĞRENCİ LİSTESİ + SİL
+function ogrenciListele(){
+  const arama = document.getElementById('arama').value.toLowerCase();
+  const tbody = document.querySelector('#ogrenciTablo tbody');
+  tbody.innerHTML = '';
+
+  ogrenciler.filter(o =>
+    o.no.toLowerCase().includes(arama) ||
+    o.ad.toLowerCase().includes(arama) ||
+    o.sinif.toLowerCase().includes(arama)
+  ).forEach(o=>{
+    tbody.innerHTML += `<tr>
+      <td><input type="checkbox" class="sec" value="${o.no}"></td>
+      <td>${o.no}</td>
+      <td>${o.ad}</td>
+      <td>${o.sinif}</td>
+      <td>${o.sifre}</td>
+      <td><button class="sil-btn tehlike" onclick="ogrenciSil('${o.no}')">Sil</button></td>
+    </tr>`;
   });
 }
-document.getElementById('list').innerHTML=h;
+
+function tumSec(){
+  const checkAll = document.getElementById('checkAll').checked;
+  document.querySelectorAll('.sec').forEach(c=>c.checked=checkAll);
 }
 
-function sil(i){
-if(confirm(ogrenciler[i].ad+' silinsin mi?')){
-  ogrenciler.splice(i,1);
-  localStorage.setItem('ogr', JSON.stringify(ogrenciler));
-  alert('Silindi! Şimdi Yedek sekmesinden JSON indirip GitHub a yükle.');
-  listele();
-}
+function seciliSil(){
+  const secili = [...document.querySelectorAll('.sec:checked')].map(c=>c.value);
+  if(secili.length==0){alert('Seçili öğrenci yok!'); return;}
+  if(!confirm(secili.length + ' öğrenci silinsin mi?')) return;
+
+  ogrenciler = ogrenciler.filter(o=>!secili.includes(o.no));
+  alert('Silindi! Yedek sekmesinden indir.');
+  ogrenciListele(); notOgrenciYukle();
 }
 
-function ogrYukle(){
-let s=document.getElementById('nsinif').value;
-let d=ogrenciler.filter(x=>x.sinif==s);
-let sel=document.getElementById('nogr');
-sel.innerHTML='<option>Seç</option>';
-d.forEach(x=>sel.innerHTML+=`<option>${x.ad}</option>`);
-sel.onchange=dersYukle;
+function ogrenciSil(no){
+  if(!confirm(no + ' nolu öğrenci silinsin mi?')) return;
+  ogrenciler = ogrenciler.filter(o=>o.no!=no);
+  alert('Silindi! Yedek sekmesinden indir.');
+  ogrenciListele(); notOgrenciYukle();
 }
 
-function dersYukle(){
-let a=document.getElementById('nogr').value;
-let o=ogrenciler.find(x=>x.ad==a);
-let sel=document.getElementById('nders');
-sel.innerHTML='<option>Seç</option>';
-for(let d in o.notlar)sel.innerHTML+=`<option>${d}</option>`;
-let s=document.getElementById('nsinif').value;
-if(dersler[s])dersler[s].forEach(d=>sel.innerHTML+=`<option>${d}</option>`);
+// 4. NOT DÜZENLEME
+function notOgrenciYukle(){
+  const sel = document.getElementById('notOgrenci');
+  sel.innerHTML = '<option value="">Öğrenci Seçin</option>';
+  ogrenciler.forEach(o=>sel.innerHTML += `<option value="${o.no}">${o.no} - ${o.ad}</option>`);
 }
 
-function notKaydet(){
-let a=document.getElementById('nogr').value;
-let d=document.getElementById('nders').value;
-if(d=='Seç'){alert('Ders seç!');return;}
-let i=ogrenciler.findIndex(x=>x.ad==a);
-ogrenciler[i].notlar[d]={y1:document.getElementById('n1').value,y2:document.getElementById('n2').value,y3:document.getElementById('n3').value,y4:document.getElementById('n4').value};
-localStorage.setItem('ogr', JSON.stringify(ogrenciler));
-document.getElementById('mnot').className='mesaj basari';
-document.getElementById('mnot').innerText='✓ Kaydedildi';
-dersYukle();
+async function notlariGetir(){
+  const no = document.getElementById('notOgrenci').value;
+  const div = document.getElementById('notTablo');
+  if(!no){div.innerHTML='Öğrenci seçin...'; return;}
+
+  div.innerHTML = 'Yükleniyor...';
+  const res = await fetch(SCRIPT_URL);
+  const data = await res.json();
+  const ogrNotlar = data.slice(1).filter(r => r[0] == no);
+
+  if(ogrNotlar.length==0){div.innerHTML='Not yok'; return;}
+
+  let html = '<table><tr><th>Ders</th><th>1.Y</th><th>2.Y</th><th>3.Y</th><th>4.Y</th><th>Ort</th><th>Düzelt</th><th>Sil</th></tr>';
+  ogrNotlar.forEach((satir,i)=>{
+    const [n, ad, ders, n1, n2, n3, n4, ort, tarih] = satir;
+    html += `<tr>
+      <td>${ders}</td>
+      <td><input type="number" value="${n1}" id="n1-${i}"></td>
+      <td><input type="number" value="${n2}" id="n2-${i}"></td>
+      <td><input type="number" value="${n3}" id="n3-${i}"></td>
+      <td><input type="number" value="${n4}" id="n4-${i}"></td>
+      <td class="ortalama">${((+n1+n2+n3+n4)/4).toFixed(2)}</td>
+      <td><button class="kucuk" onclick="notGuncelle('${n}','${ders}','${tarih}',${i})">Kaydet</button></td>
+      <td><button class="sil-btn tehlike" onclick="notSil('${n}','${ders}','${tarih}')">Sil</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  div.innerHTML = html;
 }
 
-function duyGonder(){
-let s=document.getElementById('dusinif').value;
-let b=document.getElementById('dbaslik').value;
-let m=document.getElementById('dmetin').value;
-if(!b||!m){alert('Doldur!');return;}
-duyurular.push({sinif:s,baslik:b,metin:m,tarih:new Date().toLocaleDateString()});
-localStorage.setItem('duy', JSON.stringify(duyurular));
-document.getElementById('m5').className='mesaj basari';
-document.getElementById('m5').innerText='✓ Yayınlandı';
-document.getElementById('dbaslik').value='';
-document.getElementById('dmetin').value='';
+function notGuncelle(no,ders,tarih,i){
+  const n1=document.getElementById(`n1-${i}`).value;
+  const n2=document.getElementById(`n2-${i}`).value;
+  const n3=document.getElementById(`n3-${i}`).value;
+  const n4=document.getElementById(`n4-${i}`).value;
+  const ort = ((+n1+n2+n3+n4)/4).toFixed(2);
+
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body:JSON.stringify({islem:'guncelle',no,ders,tarih,not1:n1,not2:n2,not3:n3,not4:n4,ortalama:ort})
+  }).then(()=>{alert('Güncellendi!'); notlariGetir();});
 }
 
-function indir(){download('ogrenciler.json', JSON.stringify(ogrenciler, null, 2));}
-function indirDers(){download('dersler.json', JSON.stringify(dersler, null, 2));}
-function indirDuyuru(){download('duyurular.json', JSON.stringify(duyurular, null, 2));}
-function download(filename, text){
-let a = document.createElement('a');
-a.href = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
-a.download = filename; a.click();
+async function notSil(no,ders,tarih){
+  if(!confirm('Silinsin mi?')) return;
+  await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({islem:'sil',no,ders,tarih})});
+  alert('Silindi!'); notlariGetir();
+}
+
+// 5. EXCEL PDF
+function excelIndir(tip){
+  let data = tip=='ogrenciler'? ogrenciler : tip=='dersler'? dersler : [];
+  let csv = '';
+  if(tip=='ogrenciler') csv = 'No,Ad,Sınıf,Şifre\n' + data.map(o=>`${o.no},${o.ad},${o.sinif},${o.sifre}`).join('\n');
+  if(tip=='dersler') csv = 'Sınıf,Dersler\n' + data.map(d=>`${d.sinif},"${d.dersler.join(',')}"`).join('\n');
+
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = tip+'.csv'; a.click();
+}
+
+function pdfIndir(){
+  window.print(); // Basit PDF için tarayıcı yazdır
+}
+
+function jsonYukle(inputId, tip){
+  const file = document.getElementById(inputId).files[0];
+  if(!file){alert('Dosya seç!'); return;}
+  const reader = new FileReader();
+  reader.onload = e => {
+    if(tip=='ogrenciler'){ogrenciler = JSON.parse(e.target.result); ogrenciListele();}
+    if(tip=='dersler'){dersler = JSON.parse(e.target.result); sinifListesiYukle();}
+    alert('Yüklendi! Yedek sekmesinden indirip GitHub yükle.');
+  };
+  reader.readAsText(file);
 }
 </script>
 </body>
