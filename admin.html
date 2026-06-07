@@ -4,119 +4,157 @@
 <meta charset="UTF-8">
 <title>Admin Panel</title>
 <style>
-body{font-family:Arial;padding:20px;background:#f5f5f5}
-.tab{display:flex;gap:10px;margin-bottom:20px}
-.tab button{padding:10px 20px;border:none;background:#ddd;cursor:pointer;border-radius:5px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f0f2f5;padding:20px}
+.container{max-width:1200px;margin:0 auto;background:white;padding:20px;border-radius:10px}
+h2{color:#333;margin-bottom:20px;border-bottom:3px solid #4CAF50;padding-bottom:10px}
+.tab{display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid #eee}
+.tab button{padding:12px 24px;border:none;background:#e0e0e0;cursor:pointer;border-radius:5px;font-weight:bold}
 .tab button.active{background:#4CAF50;color:white}
 .tab-content{display:none}
 .tab-content.active{display:block}
-table{width:100%;border-collapse:collapse;background:white}
-th,td{border:1px solid #ddd;padding:8px;text-align:left}
-th{background:#4CAF50;color:white}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th{background:#4CAF50;color:white;padding:12px;text-align:left}
+td{padding:10px;border-bottom:1px solid #ddd}
 td[contenteditable="true"]{background:#fff3cd;outline:2px solid #ffc107}
-.btn-sil{background:#f44336;color:white;border:none;padding:5px 10px;cursor:pointer;border-radius:3px}
-.alert{padding:10px;margin:10px 0;border-radius:5px;display:none}
-.alert.success{background:#d4edda;color:#155724}
+input{width:95%;padding:8px;border:1px solid #ccc;border-radius:4px}
+.btn{background:#4CAF50;color:white;border:none;padding:12px 25px;border-radius:5px;cursor:pointer;font-weight:bold;margin:10px 0}
+.btn:hover{background:#45a049}
+.btn-wa{background:#25D366;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px}
+.btn-wa:disabled{background:#ccc;cursor:not-allowed}
+.info{background:#e3f2fd;color:#1976d2;padding:10px;border-radius:5px;margin:10px 0}
+.dosya{background:#fff3cd;padding:10px;border-radius:5px;margin:5px 0}
+a{color:#2196F3;text-decoration:none}
 </style>
 </head>
 <body>
-<h2>Öğrenci Yönetim Paneli</h2>
+<div class="container">
+  <h2>👨‍🏫 Admin Panel</h2>
 
-<div class="tab">
-  <button class="active" onclick="showTab('liste')">2. Öğrenci Listesi</button>
-</div>
+  <div class="tab">
+    <button class="active" onclick="showTab('ogrenci')">1. Öğrenci Listesi</button>
+    <button onclick="showTab('notlar')">2. Veli Notları</button>
+    <button onclick="showTab('dosyalar')">3. Veli Dosyaları</button>
+  </div>
 
-<div id="liste" class="tab-content active">
-  <div id="alert" class="alert success">Kaydedildi!</div>
-  <table id="ogrenciTablo">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Ad Soyad</th>
-        <th>Sınıf</th>
-        <th>Şifre</th>
-        <th>İşlem</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- 1. ÖĞRENCİ LİSTESİ + WHATSAPP SÜTUNU -->
+  <div id="ogrenci" class="tab-content active">
+    <div class="info">💡 İsim/Sınıf yaz → WhatsApp butonu ilerde aktif olacak. Şimdilik pasif.</div>
+    <button class="btn" onclick="kaydetOgrenci()">💾 Öğrenci JSON'u Kopyala</button>
+    <table id="ogrenciTablo">
+      <thead><tr><th>No</th><th>Ad Soyad</th><th>Sınıf</th><th>Şifre</th><th>WhatsApp</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- 2. VELİ NOTLARI - SEN DÜZENLE -->
+  <div id="notlar" class="tab-content">
+    <div class="info">💡 Hücreye çift tıkla → Düzelt → Kaydet. Sen ve veli düzenleyebilir.</div>
+    <button class="btn" onclick="kaydetNotlar()">💾 Notları Kaydet</button>
+    <table id="notTablo">
+      <thead><tr><th>Öğrenci No</th><th>Ad Soyad</th><th>Ders</th><th>Yazılı 1</th><th>Yazılı 2</th><th>Tarih</th><th>Kim</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- 3. VELİ DOSYALARI -->
+  <div id="dosyalar" class="tab-content">
+    <div class="info">Velilerin yüklediği dosyalar. İndirip analiz et.</div>
+    <div id="dosyaListesi"></div>
+  </div>
 </div>
 
 <script>
 let ogrenciler = [];
+let notlar = [];
 
 async function yukle(){
-  const res = await fetch('ogrenciler.json?v=' + Date.now());
-  ogrenciler = await res.json();
-  tabloyuCiz();
+  const r1 = await fetch('ogrenciler.json?v='+Date.now());
+  ogrenciler = await r1.json();
+  
+  const r2 = await fetch('veli-notlari.json?v='+Date.now());
+  notlar = await r2.json();
+  
+  cizOgrenci();
+  cizNotlar();
+  cizDosyalar();
 }
 
-function tabloyuCiz(){
+// 1. ÖĞRENCİ + WHATSAPP BUTONU
+function cizOgrenci(){
   const tbody = document.querySelector('#ogrenciTablo tbody');
   tbody.innerHTML = '';
-  ogrenciler.forEach(o => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+  ogrenciler.forEach((o,i) => {
+    let tel = o.telefon || '';
+    let waBtn = tel ? 
+      `<button class="btn-wa" onclick="waGonder('${tel}','${o.ad}')">WhatsApp</button>` :
+      `<button class="btn-wa" disabled>Numara Yok</button>`;
+    
+    tbody.innerHTML += `<tr>
       <td>${o.no}</td>
-      <td contenteditable="false" data-no="${o.no}" data-alan="ad">${o.ad}</td>
-      <td contenteditable="false" data-no="${o.no}" data-alan="sinif">${o.sinif}</td>
-      <td contenteditable="false" data-no="${o.no}" data-alan="sifre">${o.sifre}</td>
-      <td><button class="btn-sil" onclick="sil(${o.no})">Sil</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Çift tıkla düzenleme
-  tbody.querySelectorAll('td[contenteditable]').forEach(td => {
-    td.addEventListener('dblclick', () => {
-      td.contentEditable = true;
-      td.focus();
-    });
-
-    td.addEventListener('keydown', async (e) => {
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        td.contentEditable = false;
-        await kaydet(td.dataset.no, td.dataset.alan, td.innerText.trim());
-      }
-      if(e.key === 'Escape'){
-        td.contentEditable = false;
-        yukle(); // eski haline dön
-      }
-    });
-
-    td.addEventListener('blur', () => {
-      td.contentEditable = false;
-    });
+      <td><input value="${o.ad}" onchange="ogrenciler[${i}].ad=this.value"></td>
+      <td><input value="${o.sinif}" onchange="ogrenciler[${i}].sinif=this.value"></td>
+      <td><input value="${o.sifre}" onchange="ogrenciler[${i}].sifre=this.value"></td>
+      <td>${waBtn}</td>
+    </tr>`;
   });
 }
 
-async function kaydet(no, alan, deger){
-  await fetch('/api/ogrenci-guncelle', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({no: parseInt(no), alan: alan, deger: deger})
-  });
-  alertGoster('Kaydedildi!');
-  yukle();
+function waGonder(tel,ad){
+  let mesaj = `Merhaba ${ad} velisi, çocuğunuzun not bilgisi için yazıyorum.`;
+  let url = `https://wa.me/${tel}?text=${encodeURIComponent(mesaj)}`;
+  window.open(url, '_blank');
 }
 
-async function sil(no){
-  if(!confirm('Silinsin mi?')) return;
-  await fetch('/api/ogrenci-sil', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({no: parseInt(no)})
-  });
-  alertGoster('Silindi!');
-  yukle();
+function kaydetOgrenci(){
+  kopyala(JSON.stringify(ogrenciler,null,2));
+  alert('Öğrenci JSON kopyalandı!');
 }
 
-function alertGoster(mesaj){
-  const alert = document.getElementById('alert');
-  alert.innerText = mesaj;
-  alert.style.display = 'block';
-  setTimeout(() => alert.style.display = 'none', 2000);
+// 2. NOTLAR
+function cizNotlar(){
+  const tbody = document.querySelector('#notTablo tbody');
+  tbody.innerHTML = '';
+  notlar.forEach((n,i) => {
+    let ogr = ogrenciler.find(o => o.no == n.no);
+    tbody.innerHTML += `<tr>
+      <td>${n.no}</td>
+      <td>${ogr ? ogr.ad : 'Bilinmiyor'}</td>
+      <td contenteditable="true" onblur="notDegis(${i},'ders',this.innerText)">${n.ders}</td>
+      <td contenteditable="true" onblur="notDegis(${i},'yazili1',this.innerText)">${n.yazili1}</td>
+      <td contenteditable="true" onblur="notDegis(${i},'yazili2',this.innerText)">${n.yazili2}</td>
+      <td>${n.tarih}</td>
+      <td>${n.kim || 'Veli'}</td>
+    </tr>`;
+  });
+}
+
+function notDegis(i,alan,deger){
+  notlar[i] = deger.trim();
+  notlar[i].kim = 'Öğretmen';
+}
+
+function kaydetNotlar(){
+  kopyala(JSON.stringify(notlar,null,2));
+  alert('Notlar JSON kopyalandı!');
+}
+
+// 3. DOSYALAR
+function cizDosyalar(){
+  const div = document.getElementById('dosyaListesi');
+  fetch('dosyalar.json?v='+Date.now())
+  .then(r => r.json())
+  .then(dosyalar => {
+    div.innerHTML = '';
+    dosyalar.forEach(d => {
+      let ogr = ogrenciler.find(o => o.no == d.no);
+      div.innerHTML += `<div class="dosya">
+        <b>${ogr ? ogr.ad : 'No:'+d.no}</b> - ${d.aciklama}<br>
+        📎 <a href="${d.dosya}" target="_blank">Dosyayı İndir</a> | ${d.tarih}
+      </div>`;
+    });
+  })
+  .catch(() => div.innerHTML = 'Henüz dosya yüklenmemiş.');
 }
 
 function showTab(id){
@@ -124,6 +162,10 @@ function showTab(id){
   document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
+}
+
+function kopyala(text){
+  navigator.clipboard.writeText(text);
 }
 
 yukle();
