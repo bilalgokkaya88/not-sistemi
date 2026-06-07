@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Admin Panel v38</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{font-family:Arial;background:#667eea;padding:15px;margin:0}
 .kutu{background:white;padding:20px;border-radius:12px;max-width:900px;margin:auto}
 .tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px}
-.tab-btn{flex:1;min-width:110px;padding:12px;background:#ddd;border:none;border-radius:6px;cursor:pointer;font-weight:bold}
+.tab-btn{flex:1;min-width:110px;padding:12px;background:#ddd;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px}
 .tab-btn.aktif{background:#4caf50;color:white}
 .tab{display:none}.tab.aktif{display:block}
 input,select,textarea{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:6px;font-size:16px;box-sizing:border-box}
@@ -17,12 +17,12 @@ button.kirmizi{background:#f44336}
 .mesaj{margin-top:10px;padding:10px;border-radius:6px;text-align:center;font-weight:bold}
 .basari{background:#d4edda;color:#155724}
 .hata{background:#f8d7da;color:#721c24}
-.ogr-kart{background:#f5f5f5;padding:10px;margin:5px 0;border-radius:6px}
+.ogr-kart{background:#f5f5f5;padding:10px;margin:5px 0;border-radius:6px;position:relative}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>👨‍🏫 Admin Panel</h2>
+<h2>👨‍🏫 Admin Panel v38</h2>
 
 <div class="tabs">
 <button class="tab-btn aktif" onclick="sekme('ekle',this)">➕ Öğrenci</button>
@@ -34,10 +34,10 @@ button.kirmizi{background:#f44336}
 </div>
 
 <div id="ekle" class="tab aktif">
-<h3>Öğrenci Ekle</h3>
+<h3>Öğrenci Ekle - Telefon boşluksuz</h3>
 <select id="sinif"><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
 <input id="ad" placeholder="Öğrenci Ad Soyad">
-<input id="tel" type="tel" placeholder="Veli Telefon 05321234567">
+<input id="tel" type="tel" placeholder="Veli Telefon 05510447940" inputmode="numeric">
 <input id="sifre" type="password" placeholder="Şifre">
 <button onclick="ekle()">Kaydet</button>
 <div id="m1" class="mesaj"></div>
@@ -52,7 +52,7 @@ button.kirmizi{background:#f44336}
 </div>
 
 <div id="liste" class="tab">
-<h3>Öğrenci Listesi</h3>
+<h3>Öğrenci Listesi - Sil butonu var</h3>
 <button onclick="listele()">Yenile</button>
 <div id="list" style="margin-top:15px"></div>
 </div>
@@ -81,7 +81,7 @@ button.kirmizi{background:#f44336}
 
 <div id="yedek" class="tab">
 <h3>💾 GitHub Yedek</h3>
-<p>3 dosyayı indirip GitHub'a yükle. Telefon-bilgisayar fark etmez.</p>
+<p>Öğrenci sil/ekle yaptıktan sonra mutlaka indirip GitHub'a yükle!</p>
 <button onclick="indir()">ogrenciler.json İndir</button>
 <button onclick="indirDers()">dersler.json İndir</button>
 <button onclick="indirDuyuru()">duyurular.json İndir</button>
@@ -90,24 +90,52 @@ button.kirmizi{background:#f44336}
 </div>
 
 <script>
-let ogrenciler = JSON.parse(localStorage.getItem('ogr') || '[]');
-let dersler = JSON.parse(localStorage.getItem('ders') || '{}');
-let duyurular = JSON.parse(localStorage.getItem('duy') || '[]');
+let ogrenciler = [];
+let dersler = {};
+let duyurular = [];
+
+// Sayfa açılınca JSON'dan yükle
+async function veriYukle(){
+  try{
+    let r = await fetch('ogrenciler.json?v='+Date.now());
+    if(r.ok) ogrenciler = await r.json();
+    else ogrenciler = JSON.parse(localStorage.getItem('ogr') || '[]');
+  }catch(e){
+    ogrenciler = JSON.parse(localStorage.getItem('ogr') || '[]');
+  }
+
+  try{
+    let r2 = await fetch('dersler.json?v='+Date.now());
+    if(r2.ok) dersler = await r2.json();
+    else dersler = JSON.parse(localStorage.getItem('ders') || '{}');
+  }catch(e){
+    dersler = JSON.parse(localStorage.getItem('ders') || '{}');
+  }
+
+  try{
+    let r3 = await fetch('duyurular.json?v='+Date.now());
+    if(r3.ok) duyurular = await r3.json();
+    else duyurular = JSON.parse(localStorage.getItem('duy') || '[]');
+  }catch(e){
+    duyurular = JSON.parse(localStorage.getItem('duy') || '[]');
+  }
+}
+veriYukle();
 
 function sekme(id,btn){
 document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktif'));
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('aktif'));
 document.getElementById(id).classList.add('aktif');
 btn.classList.add('aktif');
-if(id==='liste')listele();
-if(id==='ders')dersListe();
+if(id==='liste')setTimeout(listele,200);
+if(id==='ders')setTimeout(dersListe,200);
 }
 
 function ekle(){
 let s=document.getElementById('sinif').value;
 let a=document.getElementById('ad').value.trim();
 let t=document.getElementById('tel').value.replace(/\s/g,'');
-let p=document.getElementById('sifre').value;
+let p=document.getElementById('sifre').value.trim();
 let m=document.getElementById('m1');
 m.className='mesaj';
 
@@ -116,7 +144,7 @@ if(ogrenciler.find(x=>x.tel==t)){m.className='mesaj hata';m.innerText='Bu telefo
 
 ogrenciler.push({ad:a, sinif:s, tel:t, sifre:p, notlar:{}});
 localStorage.setItem('ogr', JSON.stringify(ogrenciler));
-m.className='mesaj basari';m.innerText='Eklendi: '+a;
+m.className='mesaj basari';m.innerText='✓ Eklendi: '+a;
 document.getElementById('ad').value='';
 document.getElementById('tel').value='';
 document.getElementById('sifre').value='';
@@ -143,8 +171,27 @@ document.getElementById('dersliste').innerHTML=h||'Ders yok';
 
 function listele(){
 let h='';
-ogrenciler.forEach(x=>h+=`<div class="ogr-kart">${x.sinif} - ${x.ad} - Tel:${x.tel} - Şifre:${x.sifre}</div>`);
-document.getElementById('list').innerHTML=h||'Öğrenci yok';
+if(ogrenciler.length==0){
+  h='Öğrenci yok';
+}else{
+  ogrenciler.forEach((x,i)=>h+=`
+    <div class="ogr-kart">
+      ${x.sinif} - ${x.ad} - Tel:${x.tel} - Şifre:${x.sifre}
+      <button class="kirmizi" style="float:right;padding:5px 10px;font-size:13px" onclick="sil(${i})">Sil</button>
+      <div style="clear:both"></div>
+    </div>
+  `);
+}
+document.getElementById('list').innerHTML=h;
+}
+
+function sil(i){
+if(confirm(ogrenciler[i].ad+' silinsin mi?')){
+  ogrenciler.splice(i,1);
+  localStorage.setItem('ogr', JSON.stringify(ogrenciler));
+  alert('Silindi! Şimdi Yedek sekmesinden JSON indirip GitHub a yükle.');
+  listele();
+}
 }
 
 function ogrYukle(){
@@ -174,7 +221,7 @@ let i=ogrenciler.findIndex(x=>x.ad==a);
 ogrenciler[i].notlar[d]={y1:document.getElementById('n1').value,y2:document.getElementById('n2').value,y3:document.getElementById('n3').value,y4:document.getElementById('n4').value};
 localStorage.setItem('ogr', JSON.stringify(ogrenciler));
 document.getElementById('mnot').className='mesaj basari';
-document.getElementById('mnot').innerText='Kaydedildi';
+document.getElementById('mnot').innerText='✓ Kaydedildi';
 dersYukle();
 }
 
@@ -186,7 +233,7 @@ if(!b||!m){alert('Doldur!');return;}
 duyurular.push({sinif:s,baslik:b,metin:m,tarih:new Date().toLocaleDateString()});
 localStorage.setItem('duy', JSON.stringify(duyurular));
 document.getElementById('m5').className='mesaj basari';
-document.getElementById('m5').innerText='Yayınlandı';
+document.getElementById('m5').innerText='✓ Yayınlandı';
 document.getElementById('dbaslik').value='';
 document.getElementById('dmetin').value='';
 }
