@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel v38</title>
+<title>Admin Panel v40</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{font-family:Arial;background:#667eea;padding:15px;margin:0}
@@ -17,12 +17,12 @@ button.kirmizi{background:#f44336}
 .mesaj{margin-top:10px;padding:10px;border-radius:6px;text-align:center;font-weight:bold}
 .basari{background:#d4edda;color:#155724}
 .hata{background:#f8d7da;color:#721c24}
-.ogr-kart{background:#f5f5f5;padding:10px;margin:5px 0;border-radius:6px;position:relative}
+.ogr-kart{background:#f5f5f5;padding:12px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>👨‍🏫 Admin Panel v38</h2>
+<h2>👨‍🏫 Admin Panel v40</h2>
 
 <div class="tabs">
 <button class="tab-btn aktif" onclick="sekme('ekle',this)">➕ Öğrenci</button>
@@ -37,7 +37,7 @@ button.kirmizi{background:#f44336}
 <h3>Öğrenci Ekle - Telefon boşluksuz</h3>
 <select id="sinif"><option>5. Sınıf</option><option>6. Sınıf</option><option>7. Sınıf</option><option>8. Sınıf</option></select>
 <input id="ad" placeholder="Öğrenci Ad Soyad">
-<input id="tel" type="tel" placeholder="Veli Telefon 05510447940" inputmode="numeric">
+<input id="tel" type="tel" placeholder="Veli Telefon 05354611015" inputmode="numeric">
 <input id="sifre" type="password" placeholder="Şifre">
 <button onclick="ekle()">Kaydet</button>
 <div id="m1" class="mesaj"></div>
@@ -52,7 +52,7 @@ button.kirmizi{background:#f44336}
 </div>
 
 <div id="liste" class="tab">
-<h3>Öğrenci Listesi - Sil butonu var</h3>
+<h3>Öğrenci Listesi - Sağda Sil butonu var</h3>
 <button onclick="listele()">Yenile</button>
 <div id="list" style="margin-top:15px"></div>
 </div>
@@ -94,7 +94,7 @@ let ogrenciler = [];
 let dersler = {};
 let duyurular = [];
 
-// Sayfa açılınca JSON'dan yükle
+// JSON'dan yükle
 async function veriYukle(){
   try{
     let r = await fetch('ogrenciler.json?v='+Date.now());
@@ -174,13 +174,12 @@ let h='';
 if(ogrenciler.length==0){
   h='Öğrenci yok';
 }else{
-  ogrenciler.forEach((x,i)=>h+=`
-    <div class="ogr-kart">
-      ${x.sinif} - ${x.ad} - Tel:${x.tel} - Şifre:${x.sifre}
-      <button class="kirmizi" style="float:right;padding:5px 10px;font-size:13px" onclick="sil(${i})">Sil</button>
-      <div style="clear:both"></div>
-    </div>
-  `);
+  ogrenciler.forEach((x,i)=>{
+    h+=`<div class="ogr-kart">
+      <span>${x.sinif} - ${x.ad} - Tel:${x.tel} - Şifre:${x.sifre}</span>
+      <button class="kirmizi" onclick="sil(${i})">Sil</button>
+    </div>`;
+  });
 }
 document.getElementById('list').innerHTML=h;
 }
