@@ -2,51 +2,62 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Veli Giriş</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veli Paneli</title>
 <style>
-body{font-family:Arial;background:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
-.kutu{background:white;padding:40px;border-radius:10px;width:350px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-h2{text-align:center;color:#4CAF50;margin-bottom:30px}
-input{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:5px;font-size:16px;box-sizing:border-box}
-button{width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;font-weight:bold;margin-top:10px}
-button:hover{background:#45a049}
-.hata{color:red;text-align:center;margin-top:10px}
-.basari{color:green;text-align:center;margin-top:10px}
-.bilgi{background:#e3f2fd;padding:10px;border-radius:5px;margin:15px 0;font-size:14px}
-label{font-weight:bold;margin-top:10px;display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.kutu{background:white;padding:40px;border-radius:15px;width:100%;max-width:450px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+h2{text-align:center;color:#FF9800;margin-bottom:10px;font-size:24px}
+.alt-baslik{text-align:center;color:#666;font-size:14px;margin-bottom:25px}
+input{width:100%;padding:14px;margin:10px 0;border:2px solid #ddd;border-radius:8px;font-size:16px}
+input:focus{border-color:#FF9800;outline:none}
+button{width:100%;padding:14px;background:#FF9800;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold;margin-top:15px;transition:0.3s}
+button:hover{background:#e68900}
+.hata{color:#f44336;text-align:center;margin-top:10px;font-weight:bold}
+.basari{color:#4CAF50;text-align:center;margin-top:10px;font-weight:bold}
+.bilgi{background:#fff3e0;padding:15px;border-radius:8px;margin:20px 0;border-left:4px solid #FF9800}
+label{font-weight:bold;color:#333;margin-top:10px;display:block}
+.kucuk{font-size:12px;color:#666;margin-top:5px}
 </style>
 </head>
 <body>
 <div class="kutu">
-  <h2>👨‍👩‍👦 Veli Girişi</h2>
+  <h2>👨‍👩‍👦 Veli Paneli</h2>
+  <p class="alt-baslik">Çocuğunuzun notunu girin</p>
   
   <div id="giris">
     <label>Öğrenci No</label>
     <input type="number" id="no" placeholder="Örn: 11">
-    <label>Veli Şifre</label>
-    <input type="password" id="veliSifre" placeholder="Öğretmenin verdiği şifre">
-    <button onclick="giris()">Giriş Yap</button>
+    <p class="kucuk">Öğretmenin verdiği öğrenci numarası</p>
+    
+    <label>Veli Şifresi</label>
+    <input type="password" id="veliSifre" placeholder="Örn: v11">
+    <p class="kucuk">Öğretmenin verdiği veli şifresi</p>
+    
+    <button onclick="giris()">🔐 Giriş Yap</button>
     <p id="mesaj" class="hata"></p>
   </div>
 
   <div id="panel" style="display:none">
     <div class="bilgi">
       <b>Öğrenci:</b> <span id="ogrAd"></span><br>
-      <b>Sınıf:</b> <span id="ogrSinif"></span>
+      <b>Sınıf:</b> <span id="ogrSinif"></span><br>
+      <b>No:</b> <span id="ogrNo"></span>
     </div>
     
-    <label>Ders</label>
-    <input type="text" id="ders" placeholder="Matematik, Türkçe...">
+    <label>Ders Adı</label>
+    <input type="text" id="ders" placeholder="Matematik, Türkçe, Fen...">
     
-    <label>1. Yazılı</label>
-    <input type="number" id="yazili1" max="100" placeholder="0-100">
+    <label>1. Yazılı Notu</label>
+    <input type="number" id="yazili1" max="100" min="0" placeholder="0-100 arası">
     
-    <label>2. Yazılı</label>
-    <input type="number" id="yazili2" max="100" placeholder="0-100">
+    <label>2. Yazılı Notu</label>
+    <input type="number" id="yazili2" max="100" min="0" placeholder="0-100 arası">
     
-    <button onclick="kaydet()">💾 Notu Kaydet</button>
-    <button onclick="cikis()" style="background:#f44336">Çıkış Yap</button>
-    <p id="sonuc" class="basari"></p>
+    <button onclick="kaydet()">💾 Notu Kaydet & Kopyala</button>
+    <button onclick="cikis()" style="background:#f44336">🚪 Çıkış Yap</button>
+    <p id="sonuc"></p>
   </div>
 </div>
 
@@ -54,35 +65,55 @@ label{font-weight:bold;margin-top:10px;display:block}
 let aktifOgrenci = null;
 
 async function giris(){
-  const no = document.getElementById('no').value;
-  const sifre = document.getElementById('veliSifre').value;
+  const no = document.getElementById('no').value.trim();
+  const veliSifre = document.getElementById('veliSifre').value.trim();
   const mesaj = document.getElementById('mesaj');
   
-  const res = await fetch('ogrenciler.json?v='+Date.now());
-  const ogrenciler = await res.json();
+  if(!no || !veliSifre){
+    mesaj.innerText = 'Lütfen no ve şifreyi girin!';
+    return;
+  }
   
-  const ogr = ogrenciler.find(o => o.no == no && o.veli_sifre == sifre);
+  mesaj.innerText = 'Kontrol ediliyor...';
   
-  if(ogr && ogr.ad != "Boş"){
-    aktifOgrenci = ogr;
-    document.getElementById('giris').style.display = 'none';
-    document.getElementById('panel').style.display = 'block';
-    document.getElementById('ogrAd').innerText = ogr.ad;
-    document.getElementById('ogrSinif').innerText = ogr.sinif;
-    mesaj.innerText = '';
-  } else {
-    mesaj.innerText = 'No veya şifre hatalı!';
+  try{
+    const res = await fetch('ogrenciler.json?v='+Date.now());
+    const ogrenciler = await res.json();
+    
+    const ogr = ogrenciler.find(o => o.no == no && o.veli_sifre == veliSifre);
+    
+    if(ogr && ogr.ad != "Boş"){
+      aktifOgrenci = ogr;
+      document.getElementById('giris').style.display = 'none';
+      document.getElementById('panel').style.display = 'block';
+      document.getElementById('ogrAd').innerText = ogr.ad;
+      document.getElementById('ogrSinif').innerText = ogr.sinif;
+      document.getElementById('ogrNo').innerText = ogr.no;
+      mesaj.innerText = '';
+    } else if(ogr && ogr.ad == "Boş"){
+      mesaj.innerText = 'Bu öğrenci kaydı henüz aktif değil!';
+    } else {
+      mesaj.innerText = 'No veya veli şifresi hatalı!';
+    }
+  }catch(e){
+    mesaj.innerText = 'Sistem hatası. Sayfayı yenileyin.';
   }
 }
 
 async function kaydet(){
-  const ders = document.getElementById('ders').value;
+  const ders = document.getElementById('ders').value.trim();
   const y1 = document.getElementById('yazili1').value;
   const y2 = document.getElementById('yazili2').value;
   const sonuc = document.getElementById('sonuc');
   
-  if(!ders || y1=='' || y2==''){
-    sonuc.innerText = 'Tüm alanları doldur!';
+  if(!ders || y1==='' || y2===''){
+    sonuc.innerText = '⚠️ Tüm alanları doldurun!';
+    sonuc.className = 'hata';
+    return;
+  }
+  
+  if(y1 < 0 || y1 > 100 || y2 < 0 || y2 > 100){
+    sonuc.innerText = '⚠️ Notlar 0-100 arası olmalı!';
     sonuc.className = 'hata';
     return;
   }
@@ -90,8 +121,8 @@ async function kaydet(){
   const yeniNot = {
     no: aktifOgrenci.no,
     ders: ders,
-    yazili1: y1,
-    yazili2: y2,
+    yazili1: parseInt(y1),
+    yazili2: parseInt(y2),
     tarih: new Date().toLocaleDateString('tr-TR'),
     kim: 'Veli'
   };
@@ -104,16 +135,19 @@ async function kaydet(){
   
   notlar.push(yeniNot);
   
-  sonuc.innerText = 'JSON kopyalandı! Öğretmene gönder.\n\n' + JSON.stringify(notlar,null,2);
+  const jsonStr = JSON.stringify(notlar,null,2);
+  navigator.clipboard.writeText(jsonStr);
+  
+  sonuc.innerText = '✅ Kaydedildi! JSON kopyalandı.\nGitHub → veli-notlari.json → Yapıştır → Commit';
   sonuc.className = 'basari';
-  navigator.clipboard.writeText(JSON.stringify(notlar,null,2));
+  
+  document.getElementById('ders').value = '';
+  document.getElementById('yazili1').value = '';
+  document.getElementById('yazili2').value = '';
 }
 
 function cikis(){
-  document.getElementById('giris').style.display = 'block';
-  document.getElementById('panel').style.display = 'none';
-  document.getElementById('no').value = '';
-  document.getElementById('veliSifre').value = '';
+  location.reload();
 }
 </script>
 </body>
