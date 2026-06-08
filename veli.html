@@ -35,15 +35,14 @@ button:hover{background:#1d4ed8}
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
-let telNo = '';
+const SCRIPT_URL = 'BURAYA_YENİ_APPS_SCRIPT_LINKİNİ_YAPIŞTIR';
 
 document.getElementById('btnGiris').addEventListener('click', async () => {
-  telNo = document.getElementById('ogrNo').value.trim();
-  
-  if(telNo == ''){ 
-    alert('Telefon numarası girin'); 
-    return; 
+  let telNo = document.getElementById('ogrNo').value.trim();
+
+  if(telNo == ''){
+    alert('Telefon numarası girin');
+    return;
   }
 
   try {
@@ -55,11 +54,13 @@ document.getElementById('btnGiris').addEventListener('click', async () => {
       document.getElementById('girisPanel').style.display = 'none';
       document.getElementById('notPanel').style.display = 'block';
       alert('Hoş geldin ' + data.veli);
-    }else{
+    } else if(data.hata == 'bulunamadı'){
       alert('Kayıt bulunamadı. Telefon numarasını kontrol edin.');
+    } else {
+      alert('Hata: ' + data.hata);
     }
   } catch(e){
-    alert('Bağlantı hatası. İnterneti kontrol edin.');
+    alert('Bağlantı hatası. Apps Script iznini kontrol edin.');
   }
 });
 </script>
