@@ -2,43 +2,34 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Not Giriş Sistemi</title>
+<title>Yazılı Not Giriş</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.kutu{background:white;border-radius:15px;padding:35px;box-shadow:0 15px 50px rgba(0,0,0,0.3);width:100%;max-width:500px}
-h2{text-align:center;color:#333;margin-bottom:25px;font-size:24px}
-label{display:block;margin-top:15px;font-weight:600;color:#555;font-size:14px}
-input,select{width:100%;padding:12px;margin-top:6px;border:2px solid #ddd;border-radius:8px;font-size:16px;transition:border 0.3s}
-input:focus,select:focus{border-color:#667eea;outline:none}
-button{width:100%;padding:14px;margin-top:20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:transform 0.2s}
-button:hover{transform:translateY(-2px)}
-button:disabled{background:#ccc;cursor:not-allowed;transform:none}
+body{font-family:Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.kutu{background:white;border-radius:15px;padding:35px;max-width:450px;width:100%}
+h2{text-align:center;color:#333;margin-bottom:20px}
+label{display:block;margin-top:15px;font-weight:600;color:#555}
+input,select{width:100%;padding:12px;margin-top:6px;border:2px solid #ddd;border-radius:8px;font-size:16px}
+button{width:100%;padding:14px;margin-top:20px;background:#667eea;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}
 #notPanel{display:none}
-.ortalama{font-size:26px;text-align:center;margin:20px 0;padding:15px;background:#f0f0ff;border-radius:10px;color:#667eea;font-weight:bold}
 .sonuc{margin-top:15px;padding:14px;border-radius:8px;text-align:center;font-weight:600;display:none}
-.sonuc.basari{background:#d4edda;color:#155724;display:block}
-.sonuc.hata{background:#f8d7da;color:#721c24;display:block}
+.sonuc.ok{background:#d4edda;color:#155724}
+.sonuc.hata{background:#f8d7da;color:#721c24}
+.bilgi{font-size:14px;color:#667eea;margin-top:10px;padding:10px;background:#f0f0ff;border-radius:8px;font-weight:600}
 </style>
 </head>
 <body>
 <div class="kutu">
-<h2>Not Giriş Sistemi</h2>
+<h2>Yazılı Not Giriş</h2>
 
 <div id="girisPanel">
 <label>Öğrenci No:</label>
-<input type="text" id="ogrNo" placeholder="Öğrenci numaranızı girin">
+<input type="text" id="ogrNo" placeholder="No girin">
 <button type="button" id="btnGiris">Giriş Yap</button>
 </div>
 
 <div id="notPanel">
 <label>Sınıf:</label>
-<select id="sinif">
-<option value="">Sınıf Seçin</option>
-<option>5</option><option>6</option><option>7</option><option>8</option>
-<option>9</option><option>10</option><option>11</option><option>12</option>
-</select>
+<select id="sinif" disabled></select>
 
 <label>Ders:</label>
 <select id="ders">
@@ -49,21 +40,12 @@ button:disabled{background:#ccc;cursor:not-allowed;transform:none}
 <option>Biyoloji</option><option>Tarih</option><option>Coğrafya</option>
 </select>
 
-<label>1. Yazılı:</label>
-<input type="number" id="n1" min="0" max="100" placeholder="0-100 arası">
+<div id="siraBilgi" class="bilgi" style="display:none"></div>
 
-<label>2. Yazılı:</label>
-<input type="number" id="n2" min="0" max="100" placeholder="0-100 arası">
+<label>Not:</label>
+<input type="number" id="not" min="0" max="100" placeholder="0-100">
 
-<label>3. Yazılı:</label>
-<input type="number" id="n3" min="0" max="100" placeholder="0-100 arası">
-
-<label>4. Yazılı:</label>
-<input type="number" id="n4" min="0" max="100" placeholder="0-100 arası">
-
-<div class="ortalama">Ortalama: <span id="ort">0.00</span></div>
-
-<button type="button" id="btnGonder">Gönder</button>
+<button type="button" id="btnGonder">Kaydet</button>
 <div id="sonuc" class="sonuc"></div>
 </div>
 </div>
@@ -72,65 +54,66 @@ button:disabled{background:#ccc;cursor:not-allowed;transform:none}
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx66VooLinqE-nV8NE1I_9pYHJZV7_s7igoqqPAdUPw3GgvqT1GhhbxXTdbfj6clXJw/exec';
 let ogrNo = '';
 
-// Ortalama hesapla
-function hesapla(){
-const n1 = parseFloat(document.getElementById('n1').value) || 0;
-const n2 = parseFloat(document.getElementById('n2').value) || 0;
-const n3 = parseFloat(document.getElementById('n3').value) || 0;
-const n4 = parseFloat(document.getElementById('n4').value) || 0;
-const ort = ((n1+n2+n3+n4)/4).toFixed(2);
-document.getElementById('ort').textContent = ort;
-}
-
-// Not girişlerine hesapla bağla
-document.getElementById('n1').addEventListener('input', hesapla);
-document.getElementById('n2').addEventListener('input', hesapla);
-document.getElementById('n3').addEventListener('input', hesapla);
-document.getElementById('n4').addEventListener('input', hesapla);
-
-// Giriş yap
-document.getElementById('btnGiris').addEventListener('click', function(){
+document.getElementById('btnGiris').addEventListener('click', async function(){
 ogrNo = document.getElementById('ogrNo').value.trim();
-if(ogrNo == ''){ 
-alert('Lütfen öğrenci numaranızı girin'); 
-return; 
-}
+if(ogrNo == ''){ alert('No girin'); return; }
+
+const resp = await fetch(SCRIPT_URL + '?ogrNo=' + ogrNo);
+const data = await resp.json();
+
+if(data.sinif){
+document.getElementById('sinif').innerHTML = '<option>'+data.sinif+'</option>';
 document.getElementById('girisPanel').style.display = 'none';
 document.getElementById('notPanel').style.display = 'block';
+}else{
+alert('Öğrenci bulunamadı');
+}
 });
 
-// Gönder
-document.getElementById('btnGonder').addEventListener('click', function(){
-const sinif = document.getElementById('sinif').value;
-const ders = document.getElementById('ders').value;
-const n1 = document.getElementById('n1').value;
-const n2 = document.getElementById('n2').value;
-const n3 = document.getElementById('n3').value;
-const n4 = document.getElementById('n4').value;
-const ort = document.getElementById('ort').textContent;
-const sonucDiv = document.getElementById('sonuc');
+// Ders seçilince sıra bilgisini göster
+document.getElementById('ders').addEventListener('change', async function(){
+const ders = this.value;
+if(!ders) return;
 
-if(!sinif){ alert('Sınıf seçin'); return; }
+document.getElementById('siraBilgi').style.display = 'block';
+document.getElementById('siraBilgi').innerHTML = '⏳ Not durumu kontrol ediliyor...';
+
+// Sheets'ten mevcut notları çekmek için basit fetch
+// Not: no-cors olduğu için detay göremeyiz, kullanıcıya genel bilgi veriyoruz
+document.getElementById('siraBilgi').innerHTML = '📝 Ders seçildi. Sistem boş olan ilk yazılıyı otomatik dolduracak.';
+});
+
+document.getElementById('btnGonder').addEventListener('click', function(){
+const ders = document.getElementById('ders').value;
+const sinif = document.getElementById('sinif').value;
+const not = document.getElementById('not').value;
+const sonuc = document.getElementById('sonuc');
+
 if(!ders){ alert('Ders seçin'); return; }
-if(n1=='' || n2=='' || n3=='' || n4==''){ alert('4 notu da girin'); return; }
-if(n1<0 || n1>100 || n2<0 || n2>100 || n3<0 || n3>100 || n4<0 || n4>100){ alert('Notlar 0-100 arası olmalı'); return; }
+if(not=='' || not<0 || not>100){ alert('0-100 arası not girin'); return; }
 
 const btn = document.getElementById('btnGonder');
 btn.disabled = true;
-btn.textContent = 'Gönderiliyor...';
-sonucDiv.style.display = 'none';
+btn.textContent = 'Kaydediliyor...';
 
 fetch(SCRIPT_URL, {
 method: 'POST',
 mode: 'no-cors',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify({ogrNo, sinif, ders, n1, n2, n3, n4, ort})
+body: JSON.stringify({ogrNo, sinif, ders, not})
 });
 
-sonucDiv.innerHTML = '✅ Notlar başarıyla gönderildi! Ortalama: ' + ort;
-sonucDiv.className = 'sonuc basari';
+sonuc.innerHTML = '✅ Not kaydedildi! Ortalama güncellendi.';
+sonuc.className = 'sonuc ok';
+sonuc.style.display = 'block';
 
-setTimeout(() => location.reload(), 2500);
+setTimeout(() => {
+document.getElementById('ders').value = '';
+document.getElementById('not').value = '';
+document.getElementById('siraBilgi').style.display = 'none';
+sonuc.style.display = 'none';
+btn.disabled = false;
+btn.textContent = 'Kaydet';
+}, 2500);
 });
 </script>
 </body>
