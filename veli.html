@@ -34,22 +34,16 @@ function giris() {
   window[cbName] = function(data) {
     document.body.removeChild(script);
     delete window[cbName];
-    
-    if(data.error) {
-      alert(data.error);
-    } else {
-      alert('Hoş geldin ' + data.veli);
-      document.getElementById('sinif').value = data.sinif;
-    }
+    if(data.error) { alert(data.error); } 
+    else { alert('Hoş geldin ' + data.veli); document.getElementById('sinif').value = data.sinif; }
   };
   
-  script.onerror = function() {
-    alert('Bağlantı hatası');
-    document.body.removeChild(script);
-  };
-  
+  script.onerror = function() { alert('Bağlantı hatası'); document.body.removeChild(script); };
   document.body.appendChild(script);
 }
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
