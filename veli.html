@@ -2,118 +2,65 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yazılı Not Giriş</title>
 <style>
-body{font-family:Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.kutu{background:white;border-radius:15px;padding:35px;max-width:450px;width:100%}
-h2{text-align:center;color:#333;margin-bottom:20px}
-label{display:block;margin-top:15px;font-weight:600;color:#555}
-input,select{width:100%;padding:12px;margin-top:6px;border:2px solid #ddd;border-radius:8px;font-size:16px}
-button{width:100%;padding:14px;margin-top:20px;background:#667eea;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}
+body{font-family:Arial,sans-serif;background:#1e3a8a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.box{background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);width:320px}
+h2{text-align:center;margin-bottom:20px;color:#1e3a8a}
+label{display:block;margin:10px 0 5px;font-weight:bold}
+input,select,button{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box}
+button{background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:16px}
+button:hover{background:#1d4ed8}
 #notPanel{display:none}
-.sonuc{margin-top:15px;padding:14px;border-radius:8px;text-align:center;font-weight:600;display:none}
-.sonuc.ok{background:#d4edda;color:#155724}
-.sonuc.hata{background:#f8d7da;color:#721c24}
-.bilgi{font-size:14px;color:#667eea;margin-top:10px;padding:10px;background:#f0f0ff;border-radius:8px;font-weight:600}
 </style>
 </head>
 <body>
-<div class="kutu">
-<h2>Yazılı Not Giriş</h2>
+<div class="box">
+  <div id="girisPanel">
+    <h2>Yazılı Not Giriş</h2>
+    <label>Telefon No:</label>
+    <input type="text" id="ogrNo" placeholder="05354611015" autocomplete="tel">
+    <button id="btnGiris">Giriş Yap</button>
+  </div>
 
-<div id="girisPanel">
-<label>Telefon No:</label>
-<input type="text" id="ogrNo" placeholder="0535... şeklinde yazın">
-<button type="button" id="btnGiris">Giriş Yap</button>
-</div>
-
-<div id="notPanel">
-<label>Sınıf:</label>
-<select id="sinif" disabled></select>
-
-<label>Ders:</label>
-<select id="ders">
-<option value="">Ders Seçin</option>
-<option>Matematik</option><option>Türkçe</option><option>Fen Bilimleri</option>
-<option>Sosyal Bilgiler</option><option>İngilizce</option><option>Din Kültürü</option>
-<option>Beden Eğitimi</option><option>Kimya</option><option>Fizik</option>
-<option>Biyoloji</option><option>Tarih</option><option>Coğrafya</option>
-</select>
-
-<div id="siraBilgi" class="bilgi" style="display:none"></div>
-
-<label>Not:</label>
-<input type="number" id="not" min="0" max="100" placeholder="0-100">
-
-<button type="button" id="btnGonder">Kaydet</button>
-<div id="sonuc" class="sonuc"></div>
-</div>
+  <div id="notPanel">
+    <h2>Not Giriş</h2>
+    <label>Sınıf:</label>
+    <select id="sinif"></select>
+    <label>Not:</label>
+    <input type="number" id="not" placeholder="85">
+    <button id="btnKaydet">Kaydet</button>
+  </div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4mi5yO4lpB2wUKv_lcuxFECVOuMBV0ekQ-HyuXlhfYw93h4MNExnIV9n6wdVvEkVS/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
 let telNo = '';
 
-document.getElementById('btnGiris').addEventListener('click', async function(){
-ogrNo = document.getElementById('ogrNo').value.trim();
-if(telNo == ''){ alert('telefon numarası girin'); return; }
+document.getElementById('btnGiris').addEventListener('click', async () => {
+  telNo = document.getElementById('ogrNo').value.trim();
+  
+  if(telNo == ''){ 
+    alert('Telefon numarası girin'); 
+    return; 
+  }
 
-const resp = await fetch(SCRIPT_URL + '?action=login&no=' + telNo);
-const data = await resp.json();
+  try {
+    const resp = await fetch(SCRIPT_URL + '?action=login&no=' + telNo);
+    const data = await resp.json();
 
-if(data.sinif){
-document.getElementById('sinif').innerHTML = '<option>'+data.sinif+'</option>';
-document.getElementById('girisPanel').style.display = 'none';
-document.getElementById('notPanel').style.display = 'block';
-}else{
-alert('Kayıt bulunamadı. Telefon numarasını kontrol edin.');
-}
-});
-
-// Ders seçilince sıra bilgisini göster
-document.getElementById('ders').addEventListener('change', async function(){
-const ders = this.value;
-if(!ders) return;
-
-document.getElementById('siraBilgi').style.display = 'block';
-document.getElementById('siraBilgi').innerHTML = '⏳ Not durumu kontrol ediliyor...';
-
-// Sheets'ten mevcut notları çekmek için basit fetch
-// Not: no-cors olduğu için detay göremeyiz, kullanıcıya genel bilgi veriyoruz
-document.getElementById('siraBilgi').innerHTML = '📝 Ders seçildi. Sistem boş olan ilk yazılıyı otomatik dolduracak.';
-});
-
-document.getElementById('btnGonder').addEventListener('click', function(){
-const ders = document.getElementById('ders').value;
-const sinif = document.getElementById('sinif').value;
-const not = document.getElementById('not').value;
-const sonuc = document.getElementById('sonuc');
-
-if(!ders){ alert('Ders seçin'); return; }
-if(not=='' || not<0 || not>100){ alert('0-100 arası not girin'); return; }
-
-const btn = document.getElementById('btnGonder');
-btn.disabled = true;
-btn.textContent = 'Kaydediliyor...';
-
-fetch(SCRIPT_URL, {
-method: 'POST',
-mode: 'no-cors',
-body: JSON.stringify({ogrNo, sinif, ders, not})
-});
-
-sonuc.innerHTML = '✅ Not kaydedildi! Ortalama güncellendi.';
-sonuc.className = 'sonuc ok';
-sonuc.style.display = 'block';
-
-setTimeout(() => {
-document.getElementById('ders').value = '';
-document.getElementById('not').value = '';
-document.getElementById('siraBilgi').style.display = 'none';
-sonuc.style.display = 'none';
-btn.disabled = false;
-btn.textContent = 'Kaydet';
-}, 2500);
+    if(data.sinif){
+      document.getElementById('sinif').innerHTML = '<option>'+data.sinif+'</option>';
+      document.getElementById('girisPanel').style.display = 'none';
+      document.getElementById('notPanel').style.display = 'block';
+      alert('Hoş geldin ' + data.veli);
+    }else{
+      alert('Kayıt bulunamadı. Telefon numarasını kontrol edin.');
+    }
+  } catch(e){
+    alert('Bağlantı hatası. İnterneti kontrol edin.');
+  }
 });
 </script>
 </body>
