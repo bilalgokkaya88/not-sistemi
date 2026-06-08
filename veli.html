@@ -52,13 +52,13 @@ button{width:100%;padding:14px;margin-top:20px;background:#667eea;color:white;bo
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4mi5yO4lpB2wUKv_lcuxFECVOuMBV0ekQ-HyuXlhfYw93h4MNExnIV9n6wdVvEkVS/exec';
-let ogrNo = '';
+let telNo = '';
 
 document.getElementById('btnGiris').addEventListener('click', async function(){
 ogrNo = document.getElementById('ogrNo').value.trim();
-if(ogrNo == ''){ alert('No girin'); return; }
+if(telNo == ''){ alert('telefon numarası girin'); return; }
 
-const resp = await fetch(SCRIPT_URL + '?ogrNo=' + ogrNo);
+const resp = await fetch(SCRIPT_URL + '?action=login&no=' + telNo);
 const data = await resp.json();
 
 if(data.sinif){
@@ -66,7 +66,7 @@ document.getElementById('sinif').innerHTML = '<option>'+data.sinif+'</option>';
 document.getElementById('girisPanel').style.display = 'none';
 document.getElementById('notPanel').style.display = 'block';
 }else{
-alert('Öğrenci bulunamadı');
+alert('Kayıt bulunamadı. Telefon numarasını kontrol edin.');
 }
 });
 
