@@ -3,66 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yazılı Not Giriş</title>
+<title>Veli Giriş</title>
 <style>
-body{font-family:Arial,sans-serif;background:#1e3a8a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-.box{background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);width:320px}
-h2{text-align:center;margin-bottom:20px;color:#1e3a8a}
-label{display:block;margin:10px 0 5px;font-weight:bold}
-input,select,button{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box}
-button{background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:16px}
-button:hover{background:#1d4ed8}
-#notPanel{display:none}
+body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background:#f5f5f5;margin:0}
+.box{background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:300px}
+input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:5px;box-sizing:border-box}
+button{background:#4CAF50;color:white;border:none;cursor:pointer;font-size:16px}
+button:hover{background:#45a049}
 </style>
 </head>
 <body>
 <div class="box">
-  <div id="girisPanel">
-    <h2>Yazılı Not Giriş</h2>
-    <label>Telefon No:</label>
-    <input type="text" id="ogrNo" placeholder="05354611015" autocomplete="tel">
-    <button id="btnGiris">Giriş Yap</button>
-  </div>
-
-  <div id="notPanel">
-    <h2>Not Giriş</h2>
-    <label>Sınıf:</label>
-    <select id="sinif"></select>
-    <label>Not:</label>
-    <input type="number" id="not" placeholder="85">
-    <button id="btnKaydet">Kaydet</button>
-  </div>
+  <h2 style="text-align:center">Veli Giriş</h2>
+  <input type="text" id="tel" placeholder="Telefon: 0535..." maxlength="11">
+  <button onclick="giris()">Giriş Yap</button>
+  <input type="text" id="sinif" placeholder="Sınıf" readonly>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHNUSe2Staro_yvUUxdlwd0fhnoZYXi31_KBQ7znm8du4lowPx_tjarTreaLRZbNpC/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwD7wnKu4MiXST7z3UAzSWmoo3y-vuOx0LxPvWs1r_mPSmNksPKL3TdBTE5nyY-O3SE/exec';
 
-document.getElementById('btnGiris').addEventListener('click', async () => {
-  let telNo = document.getElementById('ogrNo').value.trim();
-
-  if(telNo == ''){
-    alert('Telefon numarası girin');
-    return;
-  }
-
-  try {
-    const resp = await fetch(SCRIPT_URL + '?action=login&no=' + telNo);
-    const data = await resp.json();
-
-    if(data.sinif){
-      document.getElementById('sinif').innerHTML = '<option>'+data.sinif+'</option>';
-      document.getElementById('girisPanel').style.display = 'none';
-      document.getElementById('notPanel').style.display = 'block';
-      alert('Hoş geldin ' + data.veli);
-    } else if(data.hata == 'bulunamadı'){
-      alert('Kayıt bulunamadı. Telefon numarasını kontrol edin.');
+function giris() {
+  var no = document.getElementById('tel').value.trim();
+  if(!no) { alert('Telefon gir'); return; }
+  
+  var cbName = 'cb' + Date.now();
+  var script = document.createElement('script');
+  script.src = SCRIPT_URL + '?action=login&no=' + encodeURIComponent(no) + '&callback=' + cbName;
+  
+  window[cbName] = function(data) {
+    document.body.removeChild(script);
+    delete window[cbName];
+    
+    if(data.error) {
+      alert(data.error);
     } else {
-      alert('Hata: ' + data.hata);
+      alert('Hoş geldin ' + data.veli);
+      document.getElementById('sinif').value = data.sinif;
     }
-  } catch(e){
-    alert('Bağlantı hatası. Apps Script iznini kontrol edin.');
-  }
-});
+  };
+  
+  script.onerror = function() {
+    alert('Bağlantı hatası');
+    document.body.removeChild(script);
+  };
+  
+  document.body.appendChild(script);
+}
 </script>
 </body>
 </html>
