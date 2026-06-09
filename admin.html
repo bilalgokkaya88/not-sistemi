@@ -1,158 +1,63 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Panel - Çift Tık Düzenle</title>
-<style>
-body{font-family:Arial;background:#f5f5f5;padding:15px;margin:0}
-.box{background:#fff;padding:20px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px #ccc}
-input,select,button{padding:10px;margin:5px;border:1px solid #ddd;border-radius:5px;font-size:14px}
-button{background:#2196F3;color:#fff;cursor:pointer;border:none}
-button:hover{opacity:0.8}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:14px}
-th{background:#4CAF50;color:#fff}
-td[contenteditable="true"]{background:#fffbf0;cursor:text}
-td[contenteditable="true"]:focus{background:#fff3cd;outline:2px solid #ffc107}
-.del{background:#f44336;padding:5px 10px}
-.kaydet{background:#4CAF50;font-weight:bold}
-.not{font-size:12px;color:#666;margin-top:5px}
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+   .kutu { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-top: 5px; }
+    button { background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 16px; }
+    button:hover { background: #218838; }
+    h3 { color: #333; margin-top: 0; }
+   .not { font-size: 12px; color: #666; margin-top: 5px; }
+  </style>
 </head>
 <body>
-<h2>📊 Admin Panel</h2>
+  <h2>📢 Admin Paneli</h2>
 
-<div class="box">
-<h3>1. Öğrenci Ekle</h3>
-<input id="no" placeholder="No" type="number">
-<input id="ad" placeholder="Ad Soyad">
-<select id="sinif"><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select>
-<input id="sifre" placeholder="Şifre" value="1234">
-<button onclick="ogrEkle()">➕ Ekle</button>
-<p id="sonuc" class="not"></p>
-</div>
+  <div class="kutu">
+    <h3>Duyuru Gönder</h3>
+    <textarea id="mesaj" placeholder="Duyuru mesajını yaz..."></textarea>
+    <input id="resim" type="text" placeholder="Resim linki - Drive linki yapıştır">
+    <div class="not">Resim için: Drive'a yükle → Paylaş → Link al</div>
+    <select id="hedef" style="width:100%; padding:10px; margin-top:10px;">
+      <option value="Tüm Veliler">Tüm Veliler</option>
+      <option value="5. Sınıflar">5. Sınıflar</option>
+      <option value="6. Sınıflar">6. Sınıflar</option>
+      <option value="7. Sınıflar">7. Sınıflar</option>
+      <option value="8. Sınıflar">8. Sınıflar</option>
+    </select>
+    <button onclick="gonder()">Gönder</button>
+    <div id="sonuc" class="not"></div>
+  </div>
 
-<div class="box">
-<h3>2. Ders Tanımla</h3>
-<select id="dersSinif"><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select>
-<input id="dersAd" placeholder="Ders Adı: Matematik">
-<button onclick="dersEkle()">➕ Ders Ekle</button>
-<p id="dersSonuc" class="not"></p>
-</div>
-
-<div class="box">
-<h3>3. Öğrenci Listesi
-<button class="kaydet" onclick="kaydetJSON()">💾 JSON Kaydet & Kopyala</button>
-<button onclick="excelIndir()">📥 Excel İndir</button>
-<button onclick="pdfIndir()">📄 PDF İndir</button>
-</h3>
-<p class="not">İpucu: Ad Soyad, Sınıf, Şifre hücrelerine tıkla → Yaz → Hücreden çıkınca otomatik kaydeder. Sonra "JSON Kaydet & Kopyala" bas!</p>
-<table id="tablo"><tr><th>No</th><th>Ad Soyad</th><th>Sınıf</th><th>Şifre</th><th>Sil</th></tr></table>
-</div>
+  <div class="kutu">
+    <h3>📖 Dini Ders Notu</h3>
+    <p>Dini dersi <b>Google Sheet → Dini Ders sekmesinden</b> düzenliyorsun.</p>
+    <p>Sen yazıp kaydet, veli otomatik görür. Buradan işin yok.</p>
+  </div>
 
 <script>
-let ogrenciler=[];
+function gonder() {
+  var mesaj = document.getElementById('mesaj').value;
+  var resim = document.getElementById('resim').value;
+  var hedef = document.getElementById('hedef').value;
 
-async function yukle(){
-  try{
-    const res=await fetch('ogrenciler.json?v='+Date.now());
-    ogrenciler=await res.json();
-    tabloDoldur();
-  }catch(e){
-    document.getElementById('sonuc').innerText='⚠️ ogrenciler.json bulunamadı. İlk öğrenciyi ekle!';
+  if (!mesaj.trim()) {
+    alert('Mesaj boş olamaz');
+    return;
   }
-}
 
-function tabloDoldur(){
-  const t=document.getElementById('tablo');
-  t.innerHTML='<tr><th>No</th><th>Ad Soyad</th><th>Sınıf</th><th>Şifre</th><th>Sil</th></tr>';
-  ogrenciler.forEach((o,i)=>{
-    t.innerHTML+=`<tr>
-      <td>${o.no}</td>
-      <td contenteditable="true" onblur="guncelle(${i},'ad',this.innerText)">${o.ad}</td>
-      <td contenteditable="true" onblur="guncelle(${i},'sinif',this.innerText)">${o.sinif}</td>
-      <td contenteditable="true" onblur="guncelle(${i},'sifre',this.innerText)">${o.sifre}</td>
-      <td><button class="del" onclick="sil(${i})">🗑️</button></td>
-    </tr>`;
-  });
-}
+  document.getElementById('sonuc').innerHTML = 'Gönderiliyor...';
 
-function guncelle(i,alan,deger){
-  ogrenciler[i][alan]=deger.trim();
-  document.getElementById('sonuc').innerText='✏️ '+alan+' güncellendi. Kaydetmeyi unutma!';
+  google.script.run.withSuccessHandler(function(r){
+    document.getElementById('sonuc').innerHTML = '✅ ' + r;
+    document.getElementById('mesaj').value = '';
+    document.getElementById('resim').value = '';
+  }).duyuruGonder(mesaj, resim, hedef);
 }
-
-function ogrEkle(){
-  const no=document.getElementById('no').value;
-  const ad=document.getElementById('ad').value;
-  const sinif=document.getElementById('sinif').value;
-  const sifre=document.getElementById('sifre').value;
-  if(!no||!ad){alert('No ve Ad gir!');return;}
-  if(ogrenciler.find(o=>o.no==no)){alert('Bu no zaten var!');return;}
-  ogrenciler.push({no,ad,sinif,sifre});
-  document.getElementById('no').value='';
-  document.getElementById('ad').value='';
-  tabloDoldur();
-  document.getElementById('sonuc').innerText='✅ Öğrenci eklendi. JSON Kaydet & Kopyala bas!';
-}
-
-function sil(i){
-  if(confirm(ogrenciler[i].ad+' silinsin mi?')){
-    ogrenciler.splice(i,1);
-    tabloDoldur();
-    document.getElementById('sonuc').innerText='🗑️ Silindi. JSON Kaydet & Kopyala bas!';
-  }
-}
-
-function kaydetJSON(){
-  const json=JSON.stringify(ogrenciler,null,2);
-  navigator.clipboard.writeText(json);
-  document.getElementById('sonuc').innerText='✅ JSON kopyalandı! GitHub → ogrenciler.json → Kalem → Yapıştır → Commit';
-}
-
-function dersEkle(){
-  const sinif=document.getElementById('dersSinif').value;
-  const ders=document.getElementById('dersAd').value.trim();
-  if(!ders){alert('Ders adı gir!');return;}
-  let dersler=[];
-  const key='dersler-'+sinif;
-  try{dersler=JSON.parse(localStorage.getItem(key)||'[]')}catch(e){}
-  if(dersler.includes(ders)){alert('Bu ders zaten var!');return;}
-  dersler.push(ders);
-  localStorage.setItem(key,JSON.stringify(dersler));
-  document.getElementById('dersAd').value='';
-  document.getElementById('dersSonuc').innerText='✅ '+sinif+'. Sınıf: '+ders+' eklendi. Veli panelde görünecek.';
-  navigator.clipboard.writeText(JSON.stringify(dersler,null,2));
-}
-
-function excelIndir(){
-  const ws=XLSX.utils.json_to_sheet(ogrenciler);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Ogrenciler');
-  XLSX.writeFile(wb,'ogrenciler.xlsx');
-}
-
-function pdfIndir(){
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF();
-  doc.setFontSize(16);
-  doc.text('Ogrenci Listesi',14,15);
-  doc.setFontSize(10);
-  let y=25;
-  doc.text('No Ad Soyad Sinif Sifre',14,y);
-  y+=7;
-  ogrenciler.forEach(o=>{
-    doc.text(`${o.no} ${o.ad.padEnd(20)} ${o.sinif} ${o.sifre}`,14,y);
-    y+=6;
-    if(y>280){doc.addPage();y=15;}
-  });
-  doc.save('ogrenciler.pdf');
-}
-
-yukle();
 </script>
 </body>
 </html>
