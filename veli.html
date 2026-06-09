@@ -5,45 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Veli Giriş</title>
 <style>
-body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background:#f5f5f5;margin:0}
-.box{background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);width:300px}
-input,button{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:5px;box-sizing:border-box}
-button{background:#4CAF50;color:white;border:none;cursor:pointer;font-size:16px}
-button:hover{background:#45a049}
+body{font-family:Arial,sans-serif;background:#f5f5f5;padding:20px}
+.container{max-width:400px;margin:50px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:5px;font-size:16px}
+button{width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:5px;font-size:16px;cursor:pointer}
+button:disabled{background:#ccc}
+.msg{margin-top:15px;padding:10px;border-radius:5px;display:none}
+.error{background:#ffebee;color:#c62828}
+.success{background:#e8f5e9;color:#2e7d32}
 </style>
 </head>
 <body>
-<div class="box">
-  <h2 style="text-align:center">Veli Giriş</h2>
-  <input type="text" id="tel" placeholder="Telefon: 0535..." maxlength="11">
-  <button onclick="giris()">Giriş Yap</button>
-  <input type="text" id="sinif" placeholder="Sınıf" readonly>
+<div class="container">
+<h2>Veli Giriş</h2>
+<input type="tel" id="no" placeholder="Öğrenci Numarası" maxlength="11">
+<button id="btn">Giriş Yap</button>
+<div id="msg" class="msg"></div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHNUSe2Staro_yvUUxdlwd0fhnoZYXi31_KBQ7znm8du4lowPx_tjarTreaLRZbNpC/exec';
+const SCRIPT_URL = 'BURAYA_APPS_SCRIPT_YENİ_LİNKİNİ_YAPIŞTIR';
 
-function giris() {
-  var no = document.getElementById('tel').value.trim();
-  if(!no) { alert('Telefon gir'); return; }
-  
-  var cbName = 'cb' + Date.now();
-  var script = document.createElement('script');
-  script.src = SCRIPT_URL + '?action=login&no=' + encodeURIComponent(no) + '&callback=' + cbName;
-  
-  window[cbName] = function(data) {
-    document.body.removeChild(script);
-    delete window[cbName];
-    if(data.error) { alert(data.error); } 
-    else { alert('Hoş geldin ' + data.veli); document.getElementById('sinif').value = data.sinif; }
-  };
-  
-  script.onerror = function() { alert('Bağlantı hatası'); document.body.removeChild(script); };
-  document.body.appendChild(script);
+function showMsg(text, type) {
+  const m = document.getElementById('msg');
+  m.className = 'msg ' + type;
+  m.textContent = text;
+  m.style.display = 'block';
 }
-</script>
-</body>
-</html>
+
+document.getElementById('btn').onclick = function() {
+  const no = document.getElementById('no').value.trim();
+  if (!no) { showMsg('Numara gir', 'error'); return; }
+
+  const btn = document.getElementById('btn');
+  btn.disabled = true;
+  btn.textContent = 'Bağlanıyor...';
+  showMsg('', '');
+
+  const cbName = 'cb' + Date.now();
+
+  window[cbName] = function(data) {
+    delete window[cbName];
+    script.remove();
+    btn.disabled = false;
+    btn.textContent = 'Giriş Yap';
+
+    if (data.error) {
+      showMsg(data.error, 'error');
+    } else if (data.ok) {
+      showMsg('Hoş geldin ' + data.name + ' - Sınıf: ' + data.class, 'success');
+    }
+  };
+
+  const script = document.createElement('script');
+  script.src = SCRIPT_URL + '?action=login&no=' + encodeURIComponent(no) + '&callback=' + cbName;
+
+  script.onerror = function() {
+    delete window[cbName];
+    btn.disabled = false;
+    btn.textContent = 'Giriş Yap';
+    showMsg('Bağlantı hatası', 'error');
+  };
+
+  document.body.appendChild(script);
+
+  setTimeout(function() {
+    if (window[cbName]) {
+      delete window[cbName];
+      script.remove();
+      btn.disabled = false;
+      btn.textContent = 'Giriş Yap';
+      showMsg('Zaman aşımı', 'error');
+    }
+  }, 10000);
+};
 </script>
 </body>
 </html>
