@@ -8,33 +8,37 @@
    .kutu{background:white; padding:20px; border-radius:10px; max-width:400px; margin:auto}
     input,button{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:5px; font-size:16px}
     button{background:#25D366; color:white; border:none; font-weight:bold}
-   .ders{white-space:pre-line; background:#e8f5e9; padding:15px; border-radius:5px; margin-top:15px}
+   .ders{white-space:pre-line; background:#e8f5e9; padding:15px; border-radius:5px; margin-top:15px; font-size:15px}
    .ad{color:#25D366; font-weight:bold; font-size:18px}
   </style>
 </head>
 <body>
   <div class="kutu" id="giris">
     <h2>📱 Veli Girişi</h2>
-    <input type="tel" id="tel" placeholder="Telefon numaranız 0535...">
+    <input type="tel" id="tel" placeholder="Telefon 0535...">
     <button onclick="girisYap()">Giriş Yap</button>
     <p id="hata" style="color:red"></p>
   </div>
 
   <div class="kutu" id="panel" style="display:none">
     <p class="ad" id="bilgi"></p>
-    <h3>📖 Dini Ders Notu</h3>
     <div class="ders" id="ders">Yükleniyor...</div>
   </div>
 
 <script>
+var globalAd = "";
+var globalSinif = "";
+
 function girisYap(){
   var tel = document.getElementById('tel').value;
   document.getElementById('hata').innerText = '';
   google.script.run.withSuccessHandler(sonuc => {
     if(sonuc.durum){
+      globalAd = sonuc.ogrenci;
+      globalSinif = sonuc.sinif;
       document.getElementById('giris').style.display='none';
       document.getElementById('panel').style.display='block';
-      document.getElementById('bilgi').innerText = sonuc.ogrenci + ' - ' + sonuc.sinif;
+      document.getElementById('bilgi').innerText = sonuc.ogrenci + ' - ' + sonuc.sinif + '. Sınıf';
       dersYukle();
     } else {
       document.getElementById('hata').innerText = 'Telefon bulunamadı';
@@ -44,8 +48,8 @@ function girisYap(){
 
 function dersYukle(){
   google.script.run.withSuccessHandler(metin => {
-    document.getElementById('ders').innerText = metin || 'Henüz ders girilmedi';
-  }).dersGetir();
+    document.getElementById('ders').innerText = metin || 'Bilgi bulunamadı';
+  }).dersGetir(globalAd, globalSinif);
 }
 </script>
 </body>
