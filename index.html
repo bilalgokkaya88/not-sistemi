@@ -1,212 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial; padding:10px; background:#f5f5f5}
-.kutu{background:white; padding:15px; margin:10px 0; border-radius:8px; box-shadow:0 2px 5px #ddd}
-input,select,button,textarea{padding:10px; margin:5px 0; width:100%; box-sizing:border-box}
-button{background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer}
-button:hover{opacity:0.9}
-table{width:100%; font-size:12px; border-collapse:collapse}
-th,td{border:1px solid #ddd; padding:5px; text-align:center}
-th{background:#4CAF50; color:white}
-</style>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; margin: 0; padding: 0; background: #f0f2f5; }
+   .login { max-width: 400px; margin: 100px auto; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .panel { display: none; padding: 20px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+    button { width: 100%; background: #007bff; color: white; border: none; padding: 14px; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+   .ders-kutu { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; white-space: pre-wrap; line-height: 1.8; font-size: 16px; }
+    h2 { color: #333; text-align: center; }
+   .cikis { background: #dc3545; margin-top: 10px; }
+  </style>
 </head>
 <body>
 
-<!-- VELİ EKRANI -->
-<div id="veli">
-  <div id="duyuruAlani" style="background:#fff3cd; padding:10px; border-left:4px solid #ffc107; margin-bottom:15px; display:none">
-    <b>📢 Duyurular</b>
-    <div id="duyuruListesi"></div>
-  </div>
-  <h3>Veli Giriş</h3>
-  <!-- Veli not görme kısmın buraya -->
+<!-- GİRİŞ EKRANI -->
+<div id="login" class="login">
+  <h2>Veli Girişi</h2>
+  <input type="tel" id="tel" placeholder="Telefon numarası: 0535...">
+  <button onclick="girisYap()">Giriş Yap</button>
+  <div id="hata" style="color:red; margin-top:10px; text-align:center;"></div>
 </div>
 
-<hr>
+<!-- VELİ PANELİ -->
+<div id="panel" class="panel">
+  <h2>Merhaba <span id="ogrenciAdi"></span></h2>
 
-<!-- ADMİN EKRANI -->
-<div id="admin">
-  <h3>Admin Giriş</h3>
-  <input id="adminSifre" type="password" placeholder="Şifre: 8998">
-  <button onclick="adminLogin()">Giriş</button>
-
-  <div id="adminPanel" style="display:none">
-
-    <div class="kutu">
-      <b>➕ Yeni Not Ekle</b>
-      <select id="nOgrenci" onchange="ogrenciSecildi()"><option>Öğrenci Seç</option></select>
-      <input id="nVeli" placeholder="Veli - otomatik gelir" readonly>
-      <input id="nSinif" placeholder="Sınıf - otomatik gelir" readonly>
-      <select id="nDers"><option>Ders Seç</option></select>
-      <input id="nY1" type="number" placeholder="1. Yazılı">
-      <input id="nY2" type="number" placeholder="2. Yazılı">
-      <input id="nY3" type="number" placeholder="3. Yazılı">
-      <input id="nY4" type="number" placeholder="4. Yazılı">
-      <button onclick="notEkle()">Kaydet</button>
-    </div>
-
-    <div class="kutu">
-      <b>📢 Yeni Duyuru Ekle</b>
-      <input id="dBaslik" placeholder="Başlık">
-      <textarea id="dMesaj" placeholder="Mesaj" rows="3"></textarea>
-      <button onclick="duyuruYayinla()">Yayınla</button>
-    </div>
-
-    <div class="kutu">
-      <button onclick="notlariListele()">Kayıtlı Notları Listele/Düzenle</button>
-      <div id="notListesi" style="margin-top:10px"></div>
-    </div>
+  <div class="ders-kutu" id="dersIcerik">
+    Yükleniyor...
   </div>
+
+  <button class="cikis" onclick="cikisYap()">Çıkış Yap</button>
 </div>
 
 <script>
-window.onload = function() {
-  duyurulariGetir();
-  ogrenciDoldur();
-  dersDoldur();
-}
+var ogrenciAdi = "";
 
-function adminLogin() {
-  const sifre = document.getElementById('adminSifre').value;
-  google.script.run.withSuccessHandler(function(ok) {
-    if(ok) document.getElementById('adminPanel').style.display = 'block';
-    else alert('Şifre yanlış Bilal Bey');
-  }).adminGiris(sifre);
-}
+function girisYap() {
+  var tel = document.getElementById('tel').value;
+  if (!tel) {
+    document.getElementById('hata').innerHTML = 'Telefon giriniz';
+    return;
+  }
 
-function duyurulariGetir() {
-  google.script.run.withSuccessHandler(function(liste) {
-    if(liste.length > 0) {
-      document.getElementById('duyuruAlani').style.display = 'block';
-      let html = '';
-      liste.forEach(d => {
-        html += `<div style="margin:8px 0; padding:8px; background:white; border-radius:5px">
-          <b>${d.baslik}</b><br>
-          <small>${new Date(d.tarih).toLocaleDateString('tr-TR')}</small><br>
-          ${d.mesaj}
-        </div>`;
-      });
-      document.getElementById('duyuruListesi').innerHTML = html;
+  google.script.run.withSuccessHandler(function(r){
+    if (r.durum) {
+      ogrenciAdi = r.ogrenci;
+      document.getElementById('ogrenciAdi').innerText = ogrenciAdi;
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('panel').style.display = 'block';
+      dersYukle();
+    } else {
+      document.getElementById('hata').innerHTML = 'Telefon bulunamadı';
     }
-  }).duyurulariGetir();
+  }).veliGiris(tel);
 }
 
-function duyuruYayinla() {
-  const baslik = document.getElementById('dBaslik').value;
-  const mesaj = document.getElementById('dMesaj').value;
-  if(!baslik ||!mesaj) return alert('Başlık ve mesaj yaz');
-  google.script.run.withSuccessHandler(msg => {
-    alert(msg);
-    document.getElementById('dBaslik').value = '';
-    document.getElementById('dMesaj').value = '';
-    duyurulariGetir();
-  }).duyuruKaydet(baslik, mesaj);
+function dersYukle() {
+  google.script.run.withSuccessHandler(function(metin){
+    document.getElementById('dersIcerik').innerText = metin;
+  }).diniDersCek();
 }
 
-function ogrenciDoldur() {
-  google.script.run.withSuccessHandler(function(liste) {
-    const sel = document.getElementById('nOgrenci');
-    liste.forEach(o => {
-      sel.innerHTML += `<option data-veli="${o.veli}" data-sinif="${o.sinif}">${o.ogrenci}</option>`;
-    });
-  }).ogrenciListesi();
-}
-
-function dersDoldur() {
-  google.script.run.withSuccessHandler(function(liste) {
-    const sel = document.getElementById('nDers');
-    liste.forEach(d => sel.innerHTML += `<option>${d}</option>`);
-  }).dersListesi();
-}
-
-function ogrenciSecildi() {
-  const opt = document.getElementById('nOgrenci').selectedOptions[0];
-  document.getElementById('nVeli').value = opt.dataset.veli || '';
-  document.getElementById('nSinif').value = opt.dataset.sinif || '';
-}
-
-function notEkle() {
-  const opt = document.getElementById('nOgrenci').selectedOptions[0];
-  const veli = opt.dataset.veli;
-  const ogrenci = opt.text;
-  const sinif = opt.dataset.sinif;
-  const ders = document.getElementById('nDers').value;
-  const y1 = Number(document.getElementById('nY1').value);
-  const y2 = Number(document.getElementById('nY2').value);
-  const y3 = Number(document.getElementById('nY3').value);
-  const y4 = Number(document.getElementById('nY4').value);
-
-  if(ogrenci=='Öğrenci Seç' || ders=='Ders Seç') return alert('Öğrenci ve Ders seç');
-  if(isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4)) return alert('Notları sayı gir');
-
-  google.script.run.withSuccessHandler(msg => {
-    alert(msg);
-    document.getElementById('nY1').value = '';
-    document.getElementById('nY2').value = '';
-    document.getElementById('nY3').value = '';
-    document.getElementById('nY4').value = '';
-    notlariListele();
-  }).notEkle(veli, ogrenci, sinif, ders, y1, y2, y3, y4);
-}
-
-function notlariListele() {
-  google.script.run.withSuccessHandler(function(liste) {
-    if(liste.length == 0) {
-      document.getElementById('notListesi').innerHTML = 'Kayıt yok';
-      return;
-    }
-    let html = '<table><tr><th>Veli</th><th>Öğrenci</th><th>Ders</th><th>Notlar</th><th>Ort</th><th>İşlem</th></tr>';
-    liste.forEach(n => {
-      html += `<tr>
-        <td>${n.veli}</td>
-        <td>${n.ogrenci}</td>
-        <td>${n.ders}</td>
-        <td>${n.y1}-${n.y2}-${n.y3}-${n.y4}</td>
-        <td><b>${n.ort? n.ort.toFixed(1): '-'}</b></td>
-        <td>
-          <button onclick="duzenle(${n.satir},${n.y1||0},${n.y2||0},${n.y3||0},${n.y4||0})">Düzenle</button>
-          <button style="background:orange" onclick="sifirla(${n.satir})">Not Sıfırla</button>
-          <button style="background:red" onclick="sil(${n.satir})">Satır Sil</button>
-        </td>
-      </tr>`;
-    });
-    html += '</table>';
-    document.getElementById('notListesi').innerHTML = html;
-  }).tumNotlariGetir();
-}
-
-function duzenle(satir, y1, y2, y3, y4) {
-  const ny1 = prompt('1. Yazılı:', y1);
-  const ny2 = prompt('2. Yazılı:', y2);
-  const ny3 = prompt('3. Yazılı:', y3);
-  const ny4 = prompt('4. Yazılı:', y4);
-  if(ny1 && ny2 && ny3 && ny4) {
-    google.script.run.withSuccessHandler(msg => {
-      alert(msg);
-      notlariListele();
-    }).notGuncelle(satir, Number(ny1), Number(ny2), Number(ny3), Number(ny4));
-  }
-}
-
-function sifirla(satir) {
-  if(confirm('Sadece notları sıfırla. Emin misin?')) {
-    google.script.run.withSuccessHandler(msg => {
-      alert(msg);
-      notlariListele();
-    }).notuSifirla(satir);
-  }
-}
-
-function sil(satir) {
-  if(confirm('Satır komple silinecek! Emin misin?')) {
-    google.script.run.withSuccessHandler(msg => {
-      alert(msg);
-      notlariListele();
-    }).notSil(satir);
-  }
+function cikisYap() {
+  document.getElementById('panel').style.display = 'none';
+  document.getElementById('login').style.display = 'block';
+  document.getElementById('tel').value = '';
 }
 </script>
 </body>
