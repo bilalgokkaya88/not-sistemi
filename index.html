@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body{font-family:Arial; padding:20px; background:#f5f5f5}
-   .kutu{background:white; padding:20px; border-radius:10px; max-width:400px; margin:auto}
+    .kutu{background:white; padding:20px; border-radius:10px; max-width:400px; margin:auto; margin-top:50px}
     input,button{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:5px; font-size:16px}
     button{background:#25D366; color:white; border:none; font-weight:bold}
-   .ders{white-space:pre-line; background:#e8f5e9; padding:15px; border-radius:5px; margin-top:15px; font-size:15px}
-   .ad{color:#25D366; font-weight:bold; font-size:18px}
+    .ders{white-space:pre-line; background:#e8f5e9; padding:15px; border-radius:5px; margin-top:15px}
+    .ad{color:#25D366; font-weight:bold; font-size:18px}
   </style>
 </head>
 <body>
@@ -28,9 +28,10 @@
 <script>
 var globalAd = "";
 var globalSinif = "";
+var globalTel = "";
 
 function girisYap(){
-  var tel = document.getElementById('tel').value;
+  globalTel = document.getElementById('tel').value;
   document.getElementById('hata').innerText = '';
   google.script.run.withSuccessHandler(sonuc => {
     if(sonuc.durum){
@@ -43,13 +44,13 @@ function girisYap(){
     } else {
       document.getElementById('hata').innerText = 'Telefon bulunamadı';
     }
-  }).veliGiris(tel);
+  }).veliGiris(globalTel);
 }
 
 function dersYukle(){
   google.script.run.withSuccessHandler(metin => {
     document.getElementById('ders').innerText = metin || 'Bilgi bulunamadı';
-  }).dersGetir(globalAd, globalSinif);
+  }).dersGetir(globalAd, globalSinif, globalTel);
 }
 </script>
 </body>
