@@ -21,6 +21,86 @@ button:disabled{background:#ccc}
 <input type="tel" id="no" placeholder="Öğrenci Numarası" maxlength="11">
 <button id="btn">Giriş Yap</button>
 <div id="msg" class="msg"></div>
+  <div id="panel" style="display:none">
+  <div class="kutu">
+    <p class="ad" id="bilgi"></p>
+  </div>
+
+  <!-- 1. Eski Panel: Dini Ders -->
+  <div class="kutu" id="diniPanel" style="display:none">
+    <h3>📖 Dini Ders Notu</h3>
+    <div class="ders" id="ders"></div>
+  </div>
+
+  <!-- 2. Yeni Panel: Sınav Notları -->
+  <div class="kutu" id="sinavPanel" style="display:none">
+    <h3>📝 Sınav Notları</h3>
+    <div id="sinav"></div>
+  </div>
+
+  <!-- 3. Yeni Panel: Ders Listesi -->
+  <div class="kutu" id="dersPanel" style="display:none">
+    <h3>📚 Ders Listesi</h3>
+    <div id="dersListesi"></div>
+  </div>
+
+  <!-- 4. Yeni Panel: Duyurular -->
+  <div class="kutu" id="duyuruPanel" style="display:none">
+    <h3>📢 Duyurular</h3>
+    <div id="duyuru"></div>
+  </div>
+</div>
+
+<script>
+var API_LINK = "BURAYA_APPS_SCRIPT_LINKINI_YAPISTIR";
+
+function girisYap(){
+  var tel = document.getElementById('tel').value.trim().replace(/\s/g,'');
+  document.getElementById('hata').innerText = '';
+  var script = document.createElement('script');
+  script.src = API_LINK + '?no=' + tel + '&callback=goster';
+  document.body.appendChild(script);
+}
+
+function goster(data){
+  if(data.error){
+    document.getElementById('hata').innerText = data.error;
+    return;
+  }
+
+  document.getElementById('giris').style.display='none';
+  document.getElementById('panel').style.display='block';
+  document.getElementById('bilgi').innerText = data.ad + ' - ' + data.sinif + '. Sınıf';
+
+  // 1. Eski: Dini Ders
+  if(data.diniDers){
+    document.getElementById('diniPanel').style.display='block';
+    document.getElementById('ders').innerText = data.diniDers;
+  }
+
+  // 2. Yeni: Sınavlar
+  if(data.sinavlar && data.sinavlar.length>0){
+    document.getElementById('sinavPanel').style.display='block';
+    var html = '';
+    data.sinavlar.forEach(n => html += n.ders + ': <b>' + n.not + '</b><br>');
+    document.getElementById('sinav').innerHTML = html;
+  }
+
+  // 3. Yeni: Dersler
+  if(data.dersler && data.dersler.length>0){
+    document.getElementById('dersPanel').style.display='block';
+    document.getElementById('dersListesi').innerHTML = data.dersler.map(d => '• ' + d).join('<br>');
+  }
+
+  // 4. Yeni: Duyurular
+  if(data.duyurular && data.duyurular.length>0){
+    document.getElementById('duyuruPanel').style.display='block';
+    var html = '';
+    data.duyurular.forEach(d => html += '<b>' + d.baslik + '</b><br>' + d.mesaj + '<br><br>');
+    document.getElementById('duyuru').innerHTML = html;
+  }
+}
+</script>
 </div>
 
 <script>
