@@ -3,135 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Veli Bilgilendirme Sistemi</title>
+<title>Veli Giriş</title>
 <style>
-body{font-family:Arial,sans-serif;background:#e3f2fd;margin:0;padding:20px}
-.container{max-width:800px;margin:50px auto;background:#fff;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-h2{text-align:center;color:#1976d2}
-input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:5px;font-size:16px;box-sizing:border-box}
-button{width:100%;padding:12px;background:#2196f3;color:white;border:none;border-radius:5px;font-size:16px;cursor:pointer;margin-top:10px}
-button:hover{background:#1976d2}
-.panel{margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:5px;background:#f9f9f9}
-.panel h3{margin-top:0;color:#1976d2;border-bottom:2px solid #1976d2;padding-bottom:5px}
+body{font-family:Arial,sans-serif;background:#f5f7fa;margin:0;padding:20px}
+.container{max-width:700px;margin:30px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+h2,h3{color:#2c3e50}
+input,select{width:100%;padding:10px;margin:8px 0;border:2px solid #ddd;border-radius:5px;font-size:15px;box-sizing:border-box}
+button{width:100%;padding:12px;background:#27ae60;color:#fff;border:none;border-radius:5px;font-size:16px;cursor:pointer;font-weight:bold;margin-top:10px}
+button:hover{background:#219a52}
+.panel{background:#ecf0f1;padding:15px;margin:15px 0;border-radius:5px;border-left:4px solid #3498db}
 table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#2196f3;color:white}
-.error{color:red;text-align:center;margin-top:10px}
-ul{padding-left:20px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px}
+th{background:#3498db;color:#fff}
+.error{color:#e74c3c;text-align:center;margin-top:10px;font-weight:bold}
+.loading{text-align:center;color:#3498db;margin-top:10px}
+.iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style>
 </head>
 <body>
 <div class="container">
-
-  <!-- GİRİŞ EKRANI -->
-  <div id="loginDiv">
-    <h2>📚 Veli Bilgilendirme Sistemi</h2>
-    <input type="text" id="telefon" placeholder="Telefon Numarası: 0535..." maxlength="11">
-    <button onclick="girisYap()">Giriş Yap</button>
-    <div id="hata" class="error"></div>
-  </div>
-
-  <!-- ÖĞRENCİ PANELİ -->
-  <div id="welcomeDiv" style="display:none">
-    <h2>📚 Veli Bilgilendirme Sistemi</h2>
-    <div id="welcomeText" style="text-align:center;font-size:18px;color:#1976d2;font-weight:bold;margin:20px 0;padding:10px;background:#e3f2fd;border-radius:5px"></div>
-    <button onclick="cikisYap()">Çıkış Yap</button>
-    
-    <!-- 4 PANEL -->
-    <div id="diniPanel" class="panel" style="display:none"></div>
-    <div id="sinavPanel" class="panel" style="display:none"></div>
-    <div id="dersPanel" class="panel" style="display:none"></div>
-    <div id="duyuruPanel" class="panel" style="display:none"></div>
-  </div>
-
+<h2>📱 Veli Giriş</h2>
+<input type="text" id="telefon" placeholder="Telefon: 0535..." />
+<button onclick="girisYap()">Giriş Yap</button>
+<div id="mesaj"></div>
+<div id="sonuc"></div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycby_nWz8BuRgEqDxn2953iKbsrbVHb_wcdqxdXLym-UwlFUXf0Etpx0a0OWH00IMIPVs/exec";
+var API_LINK = "https://script.google.com/macros/s/AKfycbx0I6x2evJ97z5jHQdbhZwR-K5-JPpxO-wqVevpbH2cV645sJVZ_Q47Y9Dy6KV0bNMg/exec";
+var veliData = {};
 
 function girisYap(){
-  var telefon = document.getElementById('telefon').value.replace(/\s/g,'').replace(/-/g,'');
-  document.getElementById('hata').innerText = '';
+  var no = document.getElementById('telefon').value.replace(/\s/g,'').replace(/-/g,'');
+  var mesaj = document.getElementById('mesaj');
+  var sonuc = document.getElementById('sonuc');
   
-  if(telefon.length < 10){
-    document.getElementById('hata').innerText = 'Geçerli telefon girin';
+  if(no.length < 10){
+    mesaj.innerHTML = '<div class="error">Telefon numarası eksik</div>';
     return;
   }
-
-  // Eski script varsa sil
-  var eskiScript = document.getElementById('jsonpScript');
-  if(eskiScript) eskiScript.remove();
-
-  // JSONP için script tag oluştur
+  
+  mesaj.innerHTML = '<div class="loading">Yükleniyor...</div>';
+  sonuc.innerHTML = '';
+  
   var script = document.createElement('script');
-  script.id = 'jsonpScript';
-  script.src = API_URL + '?callback=callback&no=' + telefon;
-  
-  script.onerror = function(){
-    document.getElementById('hata').innerText = 'Bağlantı hatası. API linkini kontrol edin.';
-  };
-  
+  script.src = API_LINK + '?no=' + no + '&callback=sonucGoster';
   document.body.appendChild(script);
 }
 
-// JSONP Callback fonksiyonu - Kod.gs burayı çağıracak
-function callback(data){
-  // Script'i temizle
-  var script = document.getElementById('jsonpScript');
-  if(script) script.remove();
+function sonucGoster(data){
+  var mesaj = document.getElementById('mesaj');
+  var sonuc = document.getElementById('sonuc');
   
-  if(!data || !data.ad){
-    document.getElementById('hata').innerText = 'Kayıt bulunamadı. Telefon numarasını kontrol edin.';
+  if(data.error){
+    mesaj.innerHTML = '<div class="error">' + data.error + '</div>';
     return;
   }
   
-  // Giriş ekranını gizle, paneli göster
-  document.getElementById('loginDiv').style.display = 'none';
-  document.getElementById('welcomeDiv').style.display = 'block';
-  document.getElementById('welcomeText').innerText = 'Hoş geldin ' + data.ad + ' - Sınıf: ' + data.sinif;
+  veliData = data;
+  mesaj.innerHTML = '';
   
-  // 1. DİNİ DERS PANELİ
-  if(data.diniDers && data.diniDers != ''){
-    document.getElementById('diniPanel').innerHTML = '<h3>📿 Dini Ders Notu</h3><p style="font-size:18px"><b>Not:</b> ' + data.diniDers + '</p>';
-    document.getElementById('diniPanel').style.display = 'block';
-  }
+  var html = '<h2>Hoş geldin ' + data.ad + ' - ' + data.sinif + '. Sınıf</h2>';
   
-  // 2. SINAV NOTLARI PANELİ  
-  if(data.sinavlar && data.sinavlar.length > 0){
-    var html = '<h3>📝 Sınav Notları</h3><table><tr><th>Ders</th><th>1.Yazılı</th><th>2.Yazılı</th><th>3.Yazılı</th><th>4.Yazılı</th><th>Ortalama</th></tr>';
+  // 1. NOT GİRİŞ FORMU
+  html += '<div class="panel"><h3>➕ Sınav Notu Ekle</h3>';
+  html += '<label>Tarih:</label><input type="date" id="tarih" value="' + new Date().toISOString().split('T')[0] + '">';
+  html += '<label>Ders Seç:</label><select id="ders">';
+  data.dersler.forEach(function(d){
+    html += '<option>' + d + '</option>';
+  });
+  html += '</select>';
+  html += '<div class="iki">';
+  html += '<div><label>1. Yazılı:</label><input type="number" id="y1" max="100"></div>';
+  html += '<div><label>2. Yazılı:</label><input type="number" id="y2" max="100"></div>';
+  html += '<div><label>3. Yazılı:</label><input type="number" id="y3" max="100"></div>';
+  html += '<div><label>4. Yazılı:</label><input type="number" id="y4" max="100"></div>';
+  html += '</div>';
+  html += '<button onclick="notKaydet()">Kaydet</button>';
+  html += '<div id="kayitMesaj"></div></div>';
+  
+  // 2. SINAV NOTLARI TABLOSU
+  if(data.sinavlar.length > 0){
+    html += '<div class="panel"><h3>📝 ' + data.ad + ' - Sınav Notları</h3><table>';
+    html += '<tr><th>Tarih</th><th>Ders</th><th>1.Y</th><th>2.Y</th><th>3.Y</th><th>4.Y</th><th>Ort</th></tr>';
     data.sinavlar.forEach(function(s){
-      html += '<tr><td>'+s.ders+'</td><td>'+s.yaz1+'</td><td>'+s.yaz2+'</td><td>'+s.yaz3+'</td><td>'+s.yaz4+'</td><td><b>'+s.ort+'</b></td></tr>';
+      html += '<tr><td>' + s.tarih + '</td><td>' + s.ders + '</td><td>' + s.y1 + '</td><td>' + s.y2 + '</td><td>' + s.y3 + '</td><td>' + s.y4 + '</td><td>' + s.ort + '</td></tr>';
     });
-    html += '</table>';
-    document.getElementById('sinavPanel').innerHTML = html;
-    document.getElementById('sinavPanel').style.display = 'block';
-  } else {
-    document.getElementById('sinavPanel').innerHTML = '<h3>📝 Sınav Notları</h3><p>Henüz not girişi yok</p>';
-    document.getElementById('sinavPanel').style.display = 'block';
+    html += '</table></div>';
   }
   
-  // 3. DERSLER PANELİ
-  if(data.dersler && data.dersler.length > 0){
-    var html = '<h3>📚 Dersler</h3><ul>';
-    data.dersler.forEach(function(d){ html += '<li>'+d+'</li>'; });
-    html += '</ul>';
-    document.getElementById('dersPanel').innerHTML = html;
-    document.getElementById('dersPanel').style.display = 'block';
+  // 3. DUYURULAR
+  if(data.duyurular.length > 0){
+    html += '<div class="panel"><h3>📢 Duyurular</h3>';
+    data.duyurular.reverse().forEach(function(d){
+      html += '<p><b>[' + d.tarih + '] ' + d.baslik + ':</b> ' + d.mesaj + '</p>';
+    });
+    html += '</div>';
   }
   
-  // 4. DUYURULAR PANELİ
-  if(data.duyurular && data.duyurular.length > 0){
-    var html = '<h3>📢 Duyurular</h3>';
-    data.duyurular.forEach(function(d){
-      html += '<div style="border-left:4px solid #2196f3;margin:10px 0;padding:10px;background:white"><b>'+d.baslik+'</b><br><small style="color:gray">'+d.tarih+'</small><br>'+d.mesaj+'</div>';
-    });
-    document.getElementById('duyuruPanel').innerHTML = html;
-    document.getElementById('duyuruPanel').style.display = 'block';
-  }
+  sonuc.innerHTML = html;
 }
 
-function cikisYap(){
-  location.reload();
+function notKaydet(){
+  var kayitMesaj = document.getElementById('kayitMesaj');
+  var data = {
+    tarih: document.getElementById('tarih').value,
+    ogrNo: veliData.ogrNo,
+    ad: veliData.ad,
+    sinif: veliData.sinif,
+    ders: document.getElementById('ders').value,
+    y1: document.getElementById('y1').value,
+    y2: document.getElementById('y2').value,
+    y3: document.getElementById('y3').value,
+    y4: document.getElementById('y4').value
+  };
+  
+  kayitMesaj.innerHTML = '<div class="loading">Kaydediliyor...</div>';
+  
+  fetch(API_LINK, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+ .then(r => r.json())
+ .then(res => {
+    kayitMesaj.innerHTML = '<div style="color:green;font-weight:bold">✅ Not kaydedildi! Sayfayı yenile.</div>';
+    setTimeout(()=>girisYap(), 1500);
+  })
+ .catch(err => {
+    kayitMesaj.innerHTML = '<div class="error">Hata: ' + err + '</div>';
+  });
 }
 </script>
 </body>
