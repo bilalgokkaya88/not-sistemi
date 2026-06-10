@@ -30,22 +30,22 @@ th{background:#3498db;color:#fff}
 </div>
 
 <script>
-var API_LINK = "https://script.google.com/macros/s/AKfycbx0I6x2evJ97z5jHQdbhZwR-K5-JPpxO-wqVevpbH2cV645sJVZ_Q47Y9Dy6KV0bNMg/exec";
+var API_LINK = "https://script.google.com/macros/s/AKfycbz8bE6BEuBjFxLcMFFV_WNE1KEZ4jE1PR6WNRlJtz7Zq2KKe58LkifCFFMZxm-oyzOb/exec";
 var veliData = {};
 
 function girisYap(){
   var no = document.getElementById('telefon').value.replace(/\s/g,'').replace(/-/g,'');
   var mesaj = document.getElementById('mesaj');
   var sonuc = document.getElementById('sonuc');
-  
+
   if(no.length < 10){
     mesaj.innerHTML = '<div class="error">Telefon numarası eksik</div>';
     return;
   }
-  
+
   mesaj.innerHTML = '<div class="loading">Yükleniyor...</div>';
   sonuc.innerHTML = '';
-  
+
   var script = document.createElement('script');
   script.src = API_LINK + '?no=' + no + '&callback=sonucGoster';
   document.body.appendChild(script);
@@ -54,17 +54,17 @@ function girisYap(){
 function sonucGoster(data){
   var mesaj = document.getElementById('mesaj');
   var sonuc = document.getElementById('sonuc');
-  
+
   if(data.error){
     mesaj.innerHTML = '<div class="error">' + data.error + '</div>';
     return;
   }
-  
+
   veliData = data;
   mesaj.innerHTML = '';
-  
+
   var html = '<h2>Hoş geldin ' + data.ad + ' - ' + data.sinif + '. Sınıf</h2>';
-  
+
   // 1. NOT GİRİŞ FORMU
   html += '<div class="panel"><h3>➕ Sınav Notu Ekle</h3>';
   html += '<label>Tarih:</label><input type="date" id="tarih" value="' + new Date().toISOString().split('T')[0] + '">';
@@ -81,7 +81,7 @@ function sonucGoster(data){
   html += '</div>';
   html += '<button onclick="notKaydet()">Kaydet</button>';
   html += '<div id="kayitMesaj"></div></div>';
-  
+
   // 2. SINAV NOTLARI TABLOSU
   if(data.sinavlar.length > 0){
     html += '<div class="panel"><h3>📝 ' + data.ad + ' - Sınav Notları</h3><table>';
@@ -91,7 +91,7 @@ function sonucGoster(data){
     });
     html += '</table></div>';
   }
-  
+
   // 3. DUYURULAR
   if(data.duyurular.length > 0){
     html += '<div class="panel"><h3>📢 Duyurular</h3>';
@@ -100,7 +100,7 @@ function sonucGoster(data){
     });
     html += '</div>';
   }
-  
+
   sonuc.innerHTML = html;
 }
 
@@ -117,19 +117,19 @@ function notKaydet(){
     y3: document.getElementById('y3').value,
     y4: document.getElementById('y4').value
   };
-  
+
   kayitMesaj.innerHTML = '<div class="loading">Kaydediliyor...</div>';
-  
+
   fetch(API_LINK, {
     method: 'POST',
     body: JSON.stringify(data)
   })
- .then(r => r.json())
- .then(res => {
+.then(r => r.json())
+.then(res => {
     kayitMesaj.innerHTML = '<div style="color:green;font-weight:bold">✅ Not kaydedildi! Sayfayı yenile.</div>';
     setTimeout(()=>girisYap(), 1500);
   })
- .catch(err => {
+.catch(err => {
     kayitMesaj.innerHTML = '<div class="error">Hata: ' + err + '</div>';
   });
 }
