@@ -1,51 +1,46 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Veli Giriş</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Arial,sans-serif;background:#f5f5f5;padding:20px}
-.container{max-width:400px;margin:50px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:5px;font-size:16px}
-button{width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:5px;font-size:16px;cursor:pointer}
-button:disabled{background:#ccc}
-.msg{margin-top:15px;padding:10px;border-radius:5px;display:none}
-.error{background:#ffebee;color:#c62828}
-.success{background:#e8f5e9;color:#2e7d32}
+body{font-family:Arial; padding:20px; background:#f5f5f5}
+.kutu{background:white; padding:20px; border-radius:10px; max-width:500px; margin:auto; margin-top:30px}
+input,button{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:5px; font-size:16px}
+button{background:#25D366; color:white; border:none; font-weight:bold; cursor:pointer}
+.panel{margin-top:15px; padding:15px; background:#e8f5e9; border-radius:8px; display:none}
+.panel h3{color:#25D366; margin-top:0}
+.ad{font-size:18px; font-weight:bold; color:#25D366}
 </style>
 </head>
 <body>
-<div class="container">
-<h2>Veli Giriş</h2>
-<input type="tel" id="no" placeholder="Öğrenci Numarası" maxlength="11">
-<button id="btn">Giriş Yap</button>
-<div id="msg" class="msg"></div>
-  <div id="panel" style="display:none">
-  <div class="kutu">
-    <p class="ad" id="bilgi"></p>
-  </div>
 
-  <!-- 1. Eski Panel: Dini Ders -->
-  <div class="kutu" id="diniPanel" style="display:none">
+<div class="kutu" id="giris">
+  <h2>📱 Veli Giriş</h2>
+  <input type="tel" id="tel" placeholder="Telefon 0535...">
+  <button onclick="girisYap()">Giriş Yap</button>
+  <p id="hata" style="color:red"></p>
+  <p id="bilgi" class="ad"></p>
+</div>
+
+<div class="kutu" id="panel" style="display:none">
+  
+  <div class="panel" id="diniPanel">
     <h3>📖 Dini Ders Notu</h3>
-    <div class="ders" id="ders"></div>
+    <div id="dini"></div>
   </div>
-
-  <!-- 2. Yeni Panel: Sınav Notları -->
-  <div class="kutu" id="sinavPanel" style="display:none">
+  
+  <div class="panel" id="sinavPanel">
     <h3>📝 Sınav Notları</h3>
     <div id="sinav"></div>
   </div>
-
-  <!-- 3. Yeni Panel: Ders Listesi -->
-  <div class="kutu" id="dersPanel" style="display:none">
+  
+  <div class="panel" id="dersPanel">
     <h3>📚 Ders Listesi</h3>
-    <div id="dersListesi"></div>
+    <div id="ders"></div>
   </div>
-
-  <!-- 4. Yeni Panel: Duyurular -->
-  <div class="kutu" id="duyuruPanel" style="display:none">
+  
+  <div class="panel" id="duyuruPanel">
     <h3>📢 Duyurular</h3>
     <div id="duyuru"></div>
   </div>
@@ -57,6 +52,8 @@ var API_LINK = "BURAYA_APPS_SCRIPT_LINKINI_YAPISTIR";
 function girisYap(){
   var tel = document.getElementById('tel').value.trim().replace(/\s/g,'');
   document.getElementById('hata').innerText = '';
+  document.getElementById('bilgi').innerText = 'Yükleniyor...';
+  
   var script = document.createElement('script');
   script.src = API_LINK + '?no=' + tel + '&callback=goster';
   document.body.appendChild(script);
@@ -64,35 +61,38 @@ function girisYap(){
 
 function goster(data){
   if(data.error){
+    document.getElementById('bilgi').innerText = '';
     document.getElementById('hata').innerText = data.error;
     return;
   }
-
+  
   document.getElementById('giris').style.display='none';
   document.getElementById('panel').style.display='block';
-  document.getElementById('bilgi').innerText = data.ad + ' - ' + data.sinif + '. Sınıf';
-
-  // 1. Eski: Dini Ders
+  document.getElementById('bilgi').innerText = 'Hoş geldin ' + data.ad + ' - Sınıf: ' + data.sinif;
+  
+  // 1. Dini Ders - E sütunu
   if(data.diniDers){
     document.getElementById('diniPanel').style.display='block';
-    document.getElementById('ders').innerText = data.diniDers;
+    document.getElementById('dini').innerText = data.diniDers;
   }
-
-  // 2. Yeni: Sınavlar
+  
+  // 2. Sınav Notları - F,G,H,I sütunları
   if(data.sinavlar && data.sinavlar.length>0){
     document.getElementById('sinavPanel').style.display='block';
     var html = '';
-    data.sinavlar.forEach(n => html += n.ders + ': <b>' + n.not + '</b><br>');
+    data.sinavlar.forEach(n => html += n.ders + ': ' + n.not + '<br>');
     document.getElementById('sinav').innerHTML = html;
+  } else {
+    document.getElementById('sinav').innerText = 'Henüz not girilmemiş';
   }
-
-  // 3. Yeni: Dersler
+  
+  // 3. Dersler - Dersler sayfası A sütunu
   if(data.dersler && data.dersler.length>0){
     document.getElementById('dersPanel').style.display='block';
-    document.getElementById('dersListesi').innerHTML = data.dersler.map(d => '• ' + d).join('<br>');
+    document.getElementById('ders').innerHTML = data.dersler.map(d => '• ' + d).join('<br>');
   }
-
-  // 4. Yeni: Duyurular
+  
+  // 4. Duyurular - Duyurular sayfası
   if(data.duyurular && data.duyurular.length>0){
     document.getElementById('duyuruPanel').style.display='block';
     var html = '';
@@ -100,65 +100,6 @@ function goster(data){
     document.getElementById('duyuru').innerHTML = html;
   }
 }
-</script>
-</div>
-
-<script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmea-zNEA0iQL0g3vBwsXY-MSlzL0jn7L5wDJXrDDMIe9O0DdibHzq52rUSR3ctXo_/exec';
-
-function showMsg(text, type) {
-  const m = document.getElementById('msg');
-  m.className = 'msg ' + type;
-  m.textContent = text;
-  m.style.display = 'block';
-}
-
-document.getElementById('btn').onclick = function() {
-  const no = document.getElementById('no').value.trim();
-  if (!no) { showMsg('Numara gir', 'error'); return; }
-
-  const btn = document.getElementById('btn');
-  btn.disabled = true;
-  btn.textContent = 'Bağlanıyor...';
-  showMsg('', '');
-
-  const cbName = 'cb' + Date.now();
-
-  window[cbName] = function(data) {
-    delete window[cbName];
-    script.remove();
-    btn.disabled = false;
-    btn.textContent = 'Giriş Yap';
-
-    if (data.error) {
-      showMsg(data.error, 'error');
-    } else if (data.ok) {
-      showMsg('Hoş geldin ' + data.name + ' - Sınıf: ' + data.class, 'success');
-    }
-  };
-
-  const script = document.createElement('script');
-  script.src = SCRIPT_URL + '?action=login&no=' + encodeURIComponent(no) + '&callback=' + cbName;
-
-  script.onerror = function() {
-    delete window[cbName];
-    btn.disabled = false;
-    btn.textContent = 'Giriş Yap';
-    showMsg('Bağlantı hatası', 'error');
-  };
-
-  document.body.appendChild(script);
-
-  setTimeout(function() {
-    if (window[cbName]) {
-      delete window[cbName];
-      script.remove();
-      btn.disabled = false;
-      btn.textContent = 'Giriş Yap';
-      showMsg('Zaman aşımı', 'error');
-    }
-  }, 10000);
-};
 </script>
 </body>
 </html>
