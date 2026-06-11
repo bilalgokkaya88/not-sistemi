@@ -61,11 +61,12 @@ function girisYap(){
       aktifSinif = res.sinif;
 
       // Dersleri doldur
-      let sel = document.getElementById('ders');
-      sel.innerHTML = '';
-      res.dersler.forEach(d=>{
-        sel.innerHTML += `<option>${d.ders}</option>`;
-      });
+let sel = document.getElementById('ders');
+sel.innerHTML = '<option value="">Ders Seçiniz</option>';
+console.log("Kod.gs'den gelen dersler:", res.dersler);
+res.dersler.forEach(d=>{
+  sel.innerHTML += `<option value="${d.ders}">${d.ders}</option>`;
+});
 
       // Duyurular
       let dHtml = '';
