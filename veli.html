@@ -44,7 +44,7 @@ button:hover{background:#45a049}
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbzilvtwtWJIdlJ04258j2krR-c9nNByb3Y46zcBnXa9XrykoIGALcRwdwlAx1k3fNl4/exec";
+const URL = "https://script.google.com/macros/s/AKfycbzWsSITlbV5c66XFYZy6yZYCke7JdcRV9xge34JEPBt3UjOt-zPlKvBozbpjeTtyabe/exec";
 let aktifTel = '';
 let aktifSinif = '';
 
@@ -64,7 +64,7 @@ function girisYap(){
       let sel = document.getElementById('ders');
       sel.innerHTML = '';
       res.dersler.forEach(d=>{
-        sel.innerHTML += `<option>${d}</option>`;
+        sel.innerHTML += `<option>${d.ders}</option>`;
       });
 
       // Duyurular
