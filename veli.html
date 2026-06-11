@@ -139,32 +139,34 @@ function notlariGoster(notlar){
   document.getElementById('notlar').innerHTML = html || 'Not yok';
 }
 
-function notKaydet(){
-let data = {
-action: 'notKaydet',
-tel: aktifTel,
-ders: document.getElementById('ders').value,
-not1: document.getElementById('not1').value,
-not2: document.getElementById('not2').value,
-not3: document.getElementById('not3').value,
-not4: document.getElementById('not4').value,
-ad: document.getElementById('ad').innerText,
-sinif: document.getElementById('sinif').innerText
- };
-fetch(URL, {
-method: 'POST',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify(data)
-})
-.then(r => r.json())
-.then(res => {
-alert(res.mesaj);
-if(res.status === 'ok') {
-document.getElementById('kayitListesi').innerHTML += `<p>✓ ${data.ders}: ${data.not1} ${data.not2} ${data.not3} ${data.not4} → Ort: ${res.mesaj.split('Ortalama: ')[1]}</p>`;
- ['not1','not2','not3','not4'].forEach(id => document.getElementById(id).value = '');
- }
-})
-.catch(err => alert('Hata: ' + err));
+function notKaydet() {
+  var aktifTel = localStorage.getItem('aktifTel');
+  
+  var data = {
+    action: 'notKaydet',
+    tel: aktifTel,
+    ad: document.getElementById('ad').innerText,
+    sinif: document.getElementById('sinif').innerText,
+    ders: document.getElementById('ders').value,
+    not1: document.getElementById('not1').value,
+    not2: document.getElementById('not2').value,
+    not3: document.getElementById('not3').value,
+    not4: document.getElementById('not4').value
+  };
+  
+  fetch(URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(res => {
+    alert(res.mesaj);
+    if(res.status === 'ok') {
+      ['not1','not2','not3','not4'].forEach(id => document.getElementById(id).value = '');
+    }
+  })
+  .catch(err => alert('Hata: ' + err));
 }
 </script>
 
