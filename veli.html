@@ -44,9 +44,11 @@ button:hover{background:#45a049}
 </div>
 
 <script>
+  var aktifTel = "";
+var aktifSinif = "";
+var aktifAd = "";
+var aktifDers = "";
 const URL = "https://script.google.com/macros/s/AKfycbxfXJYysutQJMjh_TXiRRe5n89lUV6QMPtpdDY3ZofBxewofNxDxkDOEB2wpw-FI5Vs/exec";
-let aktifTel = '';
-let aktifSinif = '';
 
 function girisYap(){
   aktifTel = document.getElementById('tel').value.replace(/\s/g,'').replace(/-/g,'');
@@ -57,6 +59,8 @@ function girisYap(){
       document.getElementById('giris').classList.add('gizli');
       document.getElementById('panel').classList.remove('gizli');
       document.getElementById('ad').innerText = res.ad;
+      aktifTel = document.getElementById('tel').value;
+      aktifAd = res.ad;
       document.getElementById('sinif').innerText = res.sinif;
       aktifSinif = res.sinif;
 
@@ -67,7 +71,51 @@ console.log("Kod.gs'den gelen dersler:", res.dersler);
 res.dersler.forEach(d=>{
   sel.innerHTML += `<option value="${d.ders}">${d.ders}</option>`;
 });
+      70 
+document.getElementById('ders').onchange = function() {
+aktifDers = this.value;
+if(aktifDers) {
+document.getElementById('secilenDersBaslik').innerText = 'Ders: ' + aktifDers;
+document.getElementById('notGiris').style.display = 'block';
+} else {
+document.getElementById('notGiris').style.display = 'none';
+}
+}
+<div id="notGiris" style="display:none; margin-top:20px;">
+  <h3 id="secilenDersBaslik">Ders: </h3>
+  <input id="not1" type="number" placeholder="1. Yazılı">
+  <input id="not2" type="number" placeholder="2. Yazılı">
+  <input id="not3" type="number" placeholder="3. Yazılı">
+  <input id="not4" type="number" placeholder="4. Yazılı">
+  <br>
+  <button onclick="kaydet()">Kaydet</button>
+  <div id="kayitListesi"></div>
+</div>
 
+<script>
+function kaydet() {
+  var data = {
+    action: 'kaydet',
+    tel: aktifTel,
+    ad: aktifAd,
+    sinif: aktifSinif,
+    ders: aktifDers,
+    not1: document.getElementById('not1').value,
+    not2: document.getElementById('not2').value,
+    not3: document.getElementById('not3').value,
+    not4: document.getElementById('not4').value
+  };
+  
+  fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)})
+  .then(r => r.json())
+  .then(res => {
+    alert(res.mesaj);
+    if(res.status === 'ok') {
+      document.getElementById('kayitListesi').innerHTML += `<p>✓ ${data.ders} kaydedildi</p>`;
+    }
+  });
+}
+</script>
       // Duyurular
       let dHtml = '';
       res.duyurular.forEach(d=>{
@@ -92,15 +140,33 @@ function notlariGoster(notlar){
 }
 
 function notKaydet(){
-  let data = {
-    action:'notKaydet',
-    tel: aktifTel,
-    ders: document.getElementById('ders').value,
-    y1: document.getElementById('y1').value,
-    y2: document.getElementById('y2').value,
-    y3: document.getElementById('y3').value,
-    y4: document.getElementById('y4').value
-  };
+let data = {
+action: 'notKaydet',
+tel: aktifTel,
+ders: document.getElementById('ders').value,
+not1: document.getElementById('not1').value,
+not2: document.getElementById('not2').value,
+not3: document.getElementById('not3').value,
+not4: document.getElementById('not4').value,
+ad: document.getElementById('ad').innerText,
+sinif: document.getElementById('sinif').innerText
+ };
+fetch(URL, {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(data)
+})
+.then(r => r.json())
+.then(res => {
+alert(res.mesaj);
+if(res.status === 'ok') {
+document.getElementById('kayitListesi').innerHTML += `<p>✓ ${data.ders}: ${data.not1} ${data.not2} ${data.not3} ${data.not4} → Ort: ${res.mesaj.split('Ortalama: ')[1]}</p>`;
+ ['not1','not2','not3','not4'].forEach(id => document.getElementById(id).value = '');
+ }
+})
+.catch(err => alert('Hata: ' + err));
+}
+</script>
 
   fetch(URL, {
     method:'POST',
