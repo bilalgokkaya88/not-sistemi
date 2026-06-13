@@ -31,20 +31,19 @@ button:hover{background:#45a049}
 
 <h3>Not Girişi</h3>
 <select id="ders"></select>
-<input type="number" id="y1" placeholder="1. Yazılı">
-<input type="number" id="y2" placeholder="2. Yazılı">
-<input type="number" id="y3" placeholder="3. Yazılı">
-<input type="number" id="y4" placeholder="4. Yazılı">
+<input type="number" id="y1" placeholder="1. Yazılı" min="0" max="100">
+<input type="number" id="y2" placeholder="2. Yazılı" min="0" max="100">
+<input type="number" id="y3" placeholder="3. Yazılı" min="0" max="100">
+<input type="number" id="y4" placeholder="4. Yazılı" min="0" max="100">
 <button onclick="notKaydet()">Kaydet</button>
 
 <h3>Notlarım</h3>
 <div id="notlar"></div>
-
 <button onclick="cikis()">Çıkış</button>
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbwL1U1AzW6SwpCYs1o_ZusiaqNGaqBvFa3Pq4bIdEhdbByrqmza90aIxe0k1ylxCTg/exec";
+const URL = "https://script.google.com/macros/s/AKfycbyQH24--8_BQEFtpc-cGwUsThXQraofdYEzhP6VxLQP0_P6ZH1vkrBBaJV98W5e014O/exec";
 let aktifTel = '';
 let aktifSinif = '';
 
@@ -60,15 +59,12 @@ function girisYap(){
       document.getElementById('sinif').innerText = res.sinif;
       aktifSinif = res.sinif;
 
-      // Dersleri doldur
-let sel = document.getElementById('ders');
-sel.innerHTML = '<option value="">Ders Seçiniz</option>';
-console.log("Kod.gs'den gelen dersler:", res.dersler);
-res.dersler.forEach(d=>{
-  sel.innerHTML += `<option value="${d.ders}">${d.ders}</option>`;
-});
+      let sel = document.getElementById('ders');
+      sel.innerHTML = '<option value="">Ders Seçiniz</option>';
+      res.dersler.forEach(d=>{
+        sel.innerHTML += `<option value="${d.ders}">${d.ders}</option>`;
+      });
 
-      // Duyurular
       let dHtml = '';
       res.duyurular.forEach(d=>{
         dHtml += `<div class="duyuru"><b>${d.baslik}</b><br>${d.mesaj}</div>`;
@@ -77,9 +73,10 @@ res.dersler.forEach(d=>{
 
       notlariGoster(res.notlar);
     } else {
-      alert(res.msg);
+      alert(res.mesaj);
     }
-  });
+  })
+ .catch(err => alert('Hata: ' + err));
 }
 
 function notlariGoster(notlar){
@@ -92,9 +89,16 @@ function notlariGoster(notlar){
 }
 
 function notKaydet(){
+  if(document.getElementById('ders').value == '') {
+    alert('Lütfen ders seçin');
+    return;
+  }
+
   let data = {
-    action:'notKaydet',
+    action: 'notKaydet',
     tel: aktifTel,
+    ad: document.getElementById('ad').innerText,
+    sinif: document.getElementById('sinif').innerText,
     ders: document.getElementById('ders').value,
     y1: document.getElementById('y1').value,
     y2: document.getElementById('y2').value,
@@ -103,14 +107,19 @@ function notKaydet(){
   };
 
   fetch(URL, {
-    method:'POST',
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
-  }).then(r=>r.json()).then(res=>{
+  })
+ .then(r=>r.json())
+ .then(res=>{
+    alert(res.mesaj);
     if(res.status=='ok'){
-      alert('Kaydedildi');
-      girisYap(); // Listeyi yenile
+      ['y1','y2','y3','y4'].forEach(id => document.getElementById(id).value = '');
+      girisYap();
     }
-  });
+  })
+ .catch(err => alert('Hata: ' + err));
 }
 
 function cikis(){
