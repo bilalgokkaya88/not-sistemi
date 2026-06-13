@@ -44,7 +44,53 @@ button:hover{background:#45a049}
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbyGngeNPDVOxZR83HtMAXNTjgWe9xChKf6MWmQHPF8FK17s7sz0xSk0zJutzmULuvRH/exec";
+const URL = "// 👇 BURADAN SONRASINI YAPIŞTIR - 118. satırın altına
+
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  if (data.action === 'notKaydet') {
+    var result = kaydetNot(data);
+    return createCorsResponse(result);
+  }
+  return createCorsResponse({status: "hata", mesaj: "Geçersiz action"});
+}
+
+function createCorsResponse(data) {
+  return ContentService
+ .createTextOutput(JSON.stringify(data))
+ .setMimeType(ContentService.MimeType.JSON);
+}
+
+function kaydetNot(data) {
+  var ss = SpreadsheetApp.openById(SS_ID);
+  var sheet = ss.getSheetByName('Sınav notları');
+  var tarih = new Date();
+  var tel = data.tel;
+  
+  // Ad ve sınıfı bul
+  var ogrSheet = ss.getSheetByName('Ogrenciler');
+  var ogrData = ogrSheet.getDataRange().getValues();
+  var ad = ""; var sinif = "";
+  for (var i = 1; i < ogrData.length; i++) {
+    if (String(ogrData[i][2]).replace(/\D/g,'') == String(tel).replace(/\D/g,'')) {
+      ad = ogrData[i][1];
+      sinif = String(ogrData[i][0]);
+      break;
+    }
+  }
+  
+  var ders = data.ders;
+  var y1 = parseFloat(data.y1) || "";
+  var y2 = parseFloat(data.y2) || "";
+  var y3 = parseFloat(data.y3) || "";
+  var y4 = parseFloat(data.y4) || "";
+  
+  var notlar = [y1, y2, y3, y4].filter(n => n!== "");
+  var ortalama = notlar.length > 0? (notlar.reduce((a,b) => a+b, 0) / notlar.length).toFixed(2) : "";
+  
+  sheet.appendRow([tarih, tel, ad, sinif, ders, y1, y2, y3, y4, ortalama]);
+  return {status: "ok", mesaj: "Kaydedildi ✓ Ortalama: " + ortalama};
+}";
 let aktifTel = '';
 let aktifSinif = '';
 
