@@ -1,186 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Veli Panel</title>
-  <style>
-    body{font-family:Arial;padding:20px;background:#f5f5f5}
-   .kutu{background:white;padding:15px;margin:10px 0;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-    input,select,button{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px}
-    button{background:#4CAF50;color:white;border:none;cursor:pointer}
-    button:hover{background:#45a049}
-   .not-karti{border-left:4px solid #4CAF50;padding:8px;margin:5px 0;background:#f9f9f9}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veli Panel</title>
+<style>
+body{font-family:Arial; margin:0; padding:20px; background:#f5f5f5}
+.kutu{background:white; padding:20px; border-radius:10px; max-width:500px; margin:auto}
+input,select,button{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:5px}
+button{background:#4CAF50; color:white; border:none; cursor:pointer}
+button:hover{background:#45a049}
+.not-karti{background:#e8f5e9; padding:10px; margin:5px 0; border-radius:5px}
+.duyuru{background:#fff3cd; padding:10px; margin:5px 0; border-left:4px solid #ffc107}
+.gizli{display:none}
+</style>
 </head>
 <body>
-
-<div id="giris" class="kutu">
-  <h2>Veli Giriş</h2>
-  <input type="tel" id="veliTel" placeholder="Veli Telefon Numarası">
-  <button onclick="girisYap()">Giriş Yap</button>
+<div class="kutu" id="giris">
+<h2>Veli Girişi</h2>
+<input type="tel" id="tel" placeholder="Telefon numarası">
+<button onclick="girisYap()">Giriş Yap</button>
 </div>
 
-<div id="cocukSecim" class="kutu" style="display:none;">
-  <h3>Çocuğunuzu Seçin</h3>
-  <div id="cocukListesi"></div>
-</div>
+<div class="kutu gizli" id="panel">
+<h2 id="ad"></h2>
+<p>Sınıf: <span id="sinif"></span></p>
 
-<div id="panel" style="display:none;">
-  <div class="kutu">
-    <h2 id="ad"></h2>
-    <p><b>Sınıf:</b> <span id="sinif"></span></p>
-    <button onclick="cikisYap()">Çıkış Yap</button>
-  </div>
+<h3>Duyurular</h3>
+<div id="duyurular"></div>
 
-  <div class="kutu">
-    <h3>Not Girişi</h3>
-    <select id="ders"><option>Ders seçiniz</option></select>
-    <input type="number" id="not1" placeholder="1. Yazılı 0-100" min="0" max="100">
-    <input type="number" id="not2" placeholder="2. Yazılı 0-100" min="0" max="100">
-    <input type="number" id="not3" placeholder="3. Yazılı 0-100" min="0" max="100">
-    <input type="number" id="not4" placeholder="4. Yazılı 0-100" min="0" max="100">
-    <button onclick="notKaydet()">Kaydet</button>
-  </div>
+<h3>Not Girişi</h3>
+<select id="ders"></select>
+<input type="number" id="y1" placeholder="1. Yazılı">
+<input type="number" id="y2" placeholder="2. Yazılı">
+<input type="number" id="y3" placeholder="3. Yazılı">
+<input type="number" id="y4" placeholder="4. Yazılı">
+<button onclick="notKaydet()">Kaydet</button>
 
-  <div class="kutu">
-    <h3>Notlarım</h3>
-    <div id="notlar">Yükleniyor...</div>
-  </div>
+<h3>Notlarım</h3>
+<div id="notlar"></div>
 
-  <div class="kutu">
-    <h3>Duyurular</h3>
-    <div id="duyurular">Yükleniyor...</div>
-  </div>
+<button onclick="cikis()">Çıkış</button>
 </div>
 
 <script>
-var URL = 'https://script.google.com/macros/s/AKfycbxqIAcgucKOJ0EcUwvmx-u3ioJsiVPmEeVAsSYDnBYOPXPMN5Ru-kghByZzwSdBPkd4/exec';
-var aktifCocuk = {};
+const URL = "https://script.google.com/macros/s/AKfycbxqIAcgucKOJ0EcUwvmx-u3ioJsiVPmEeVAsSYDnBYOPXPMN5Ru-kghByZzwSdBPkd4/exec";
+let aktifTel = '';
+let aktifSinif = '';
 
-function girisYap() {
-  var veliTel = document.getElementById('veliTel').value.trim();
-  if(!veliTel) {alert('Telefon girin'); return;}
+function girisYap(){
+  aktifTel = document.getElementById('tel').value.replace(/\s/g,'').replace(/-/g,'');
+  fetch(URL + '?action=giris&tel=' + aktifTel)
+ .then(r=>r.json())
+ .then(res=>{
+    if(res.status=='ok'){
+      document.getElementById('giris').classList.add('gizli');
+      document.getElementById('panel').classList.remove('gizli');
+      document.getElementById('ad').innerText = res.ad;
+      document.getElementById('sinif').innerText = res.sinif;
+      aktifSinif = res.sinif;
 
-  fetch(URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: 'giris', tel: veliTel})
-  })
-.then(r => r.json())
-.then(res => {
-    if(res.status === 'ok') {
-      if(res.cocuklar.length === 1) {
-        cocukSec(res.cocuklar[0]);
-      } else {
-        document.getElementById('giris').style.display = 'none';
-        document.getElementById('cocukSecim').style.display = 'block';
-        let html = '';
-        res.cocuklar.forEach(c => {
-          html += `<button onclick='cocukSec(${JSON.stringify(c)})'>${c.ad} - ${c.sinif}</button>`;
-        });
-        document.getElementById('cocukListesi').innerHTML = html;
-      }
+      // Dersleri doldur
+let sel = document.getElementById('ders');
+sel.innerHTML = '<option value="">Ders Seçiniz</option>';
+console.log("Kod.gs'den gelen dersler:", res.dersler);
+res.dersler.forEach(d=>{
+  sel.innerHTML += `<option value="${d.ders}">${d.ders}</option>`;
+});
+
+      // Duyurular
+      let dHtml = '';
+      res.duyurular.forEach(d=>{
+        dHtml += `<div class="duyuru"><b>${d.baslik}</b><br>${d.mesaj}</div>`;
+      });
+      document.getElementById('duyurular').innerHTML = dHtml || 'Duyuru yok';
+
+      notlariGoster(res.notlar);
     } else {
-      alert(res.mesaj);
+      alert(res.msg);
     }
-  })
-.catch(err => alert('Bağlantı hatası: ' + err));
-}
-
-function cocukSec(cocuk) {
-  aktifCocuk = cocuk;
-  document.getElementById('cocukSecim').style.display = 'none';
-  document.getElementById('panel').style.display = 'block';
-  document.getElementById('ad').innerText = cocuk.ad;
-  document.getElementById('sinif').innerText = cocuk.sinif;
-  dersleriYukle();
-  notlariYukle();
-  duyurulariYukle();
-}
-
-function cikisYap() {
-  location.reload();
-}
-
-function dersleriYukle() {
-  fetch(URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: 'dersleriGetir', sinif: aktifCocuk.sinif})
-  })
-.then(r => r.json())
-.then(res => {
-    let select = document.getElementById('ders');
-    select.innerHTML = '<option>Ders seçiniz</option>';
-    res.dersler.forEach(d => {
-      select.innerHTML += `<option value="${d}">${d}</option>`;
-    });
   });
 }
 
-function notKaydet() {
-  var ders = document.getElementById('ders').value;
-  if(ders === 'Ders seçiniz') {alert('Ders seçin'); return;}
+function notlariGoster(notlar){
+  let html = '';
+  notlar.forEach(n=>{
+    html += `<div class="not-karti"><b>${n.ders}</b><br>
+    Y1:${n.y1||'-'} Y2:${n.y2||'-'} Y3:${n.y3||'-'} Y4:${n.y4||'-'} Ortalama:${n.ort||'-'}</div>`;
+  });
+  document.getElementById('notlar').innerHTML = html || 'Not yok';
+}
 
-  var data = {
-    action: 'notKaydet',
-    ogrTel: aktifCocuk.ogrTel,
-    ad: aktifCocuk.ad,
-    sinif: aktifCocuk.sinif,
-    ders: ders,
-    not1: document.getElementById('not1').value,
-    not2: document.getElementById('not2').value,
-    not3: document.getElementById('not3').value,
-    not4: document.getElementById('not4').value
+function notKaydet(){
+  let data = {
+    action:'notKaydet',
+    tel: aktifTel,
+    ders: document.getElementById('ders').value,
+    y1: document.getElementById('y1').value,
+    y2: document.getElementById('y2').value,
+    y3: document.getElementById('y3').value,
+    y4: document.getElementById('y4').value
   };
 
   fetch(URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    method:'POST',
     body: JSON.stringify(data)
-  })
-.then(r => r.json())
-.then(res => {
-    alert(res.mesaj);
-    if(res.status === 'ok') {
-      notlariYukle();
-      ['not1','not2','not3','not4'].forEach(id => document.getElementById(id).value = '');
+  }).then(r=>r.json()).then(res=>{
+    if(res.status=='ok'){
+      alert('Kaydedildi');
+      girisYap(); // Listeyi yenile
     }
   });
 }
 
-function notlariYukle() {
-  fetch(URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: 'notlariGetir', ogrTel: aktifCocuk.ogrTel})
-  })
-.then(r => r.json())
-.then(res => {
-    let html = '';
-    res.notlar.forEach(n => {
-      html += `<div class="not-karti"><b>${n.ders}</b><br>
-      Y1:${n.y1||'-'} Y2:${n.y2||'-'} Y3:${n.y3||'-'} Y4:${n.y4||'-'} Ort:${n.ort||'-'}</div>`;
-    });
-    document.getElementById('notlar').innerHTML = html || 'Not yok';
-  });
-}
-
-function duyurulariYukle() {
-  fetch(URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: 'duyurulariGetir', sinif: aktifCocuk.sinif})
-  })
-.then(r => r.json())
-.then(res => {
-    let html = '';
-    res.duyurular.forEach(d => {
-      html += `<div class="not-karti"><b>${d.baslik}</b><br>${d.mesaj}</div>`;
-    });
-    document.getElementById('duyurular').innerHTML = html || 'Duyuru yok';
-  });
+function cikis(){
+  document.getElementById('panel').classList.add('gizli');
+  document.getElementById('giris').classList.remove('gizli');
+  document.getElementById('tel').value = '';
 }
 </script>
 </body>
